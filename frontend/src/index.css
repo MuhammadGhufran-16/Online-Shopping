@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Small custom tweaks on top of Tailwind */
+
+body {
+  @apply bg-slate-50 text-slate-900;
+}
+
+.nav {
+  @apply bg-slate-900 text-white px-4 py-3 flex items-center justify-between shadow-sm;
+}
+
+.nav ul {
+  @apply flex gap-4 list-none text-sm;
+}
+
+.nav a {
+  @apply text-slate-100 hover:text-white hover:underline;
+}
+
+.product-card {
+  @apply bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-col items-start gap-2;
+}
+
+/* Custom grid for product listing to avoid clashing with Tailwind's .grid utility */
+.product-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4;
+}
+/* =========================
+   PRIMARY BUTTON
+========================= */
+
+.hero-btn-primary {
+  @apply inline-flex items-center gap-3
+  px-8 py-4 rounded-full
+  font-semibold text-white
+  bg-gradient-to-r from-violet-700 via-purple-600 to-fuchsia-500
+  shadow-[0_10px_30px_rgba(168,85,247,0.45)]
+  transition-all duration-500;
+}
+
+.hero-btn-primary::after {
+  background: linear-gradient(
+    90deg,
+    #7c3aed,
+    #d946ef,
+    #7c3aed
+  );
+}
+
+.hero-btn-primary:hover::after {
+  opacity: 1;
+}
+
+.hero-btn-primary:hover {
+  transform: translateY(-4px) scale(1.04);
+}
+
+/* Shine effect */
+.hero-btn-primary::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 80%;
+  height: 100%;
+  background: rgba(255,255,255,0.3);
+  transform: skewX(-25deg);
+  transition: 0.8s;
+}
+
+.hero-btn-primary:hover::before {
+  left: 140%;
+}
+
+/* Arrow animation */
+.hero-btn-primary .arrow {
+  transition: transform 0.3s ease;
+}
+
+.hero-btn-primary:hover .arrow {
+  transform: translateX(6px);
+}
+
+/* =========================
+   SECONDARY BUTTON
+========================= */
+
+.hero-btn-secondary {
+  @apply inline-flex items-center gap-2
+  px-8 py-4 rounded-full
+  font-medium text-white
+  border border-white/20
+  bg-white/10 backdrop-blur-xl
+  shadow-lg transition-all duration-300;
+}
+
+.hero-btn-secondary:hover {
+  @apply bg-white text-slate-900;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(255,255,255,0.25);
+}
+
+/* =========================
+   DARK BUTTON
+========================= */
+
+.hero-btn-dark {
+  position: relative;
+
+  @apply inline-flex items-center gap-2
+  px-8 py-4 rounded-full
+  font-medium text-white
+  bg-slate-900
+  border border-slate-700
+  overflow-hidden
+  transition-all duration-300;
+}
+
+.hero-btn-dark::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255,255,255,0.15),
+    transparent
+  );
+  transform: translateX(-100%);
+  transition: 0.7s;
+}
+
+.hero-btn-dark:hover::before {
+  transform: translateX(100%);
+}
+
+.hero-btn-dark:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0,0,0,0.45);
+}
