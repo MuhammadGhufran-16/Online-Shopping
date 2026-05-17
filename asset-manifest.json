@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "/Online-Shopping/static/css/main.58ef40af.css",
+    "main.js": "/Online-Shopping/static/js/main.32b84bc7.js",
+    "static/js/453.d7446e4a.chunk.js": "/Online-Shopping/static/js/453.d7446e4a.chunk.js",
+    "static/media/oilImg.jpg": "/Online-Shopping/static/media/oilImg.05b1f429df03bdb3efd4.jpg",
+    "static/media/Am Logo.png": "/Online-Shopping/static/media/Am Logo.c2084c8a786eefd6a329.png",
+    "static/media/sugarImg.jpg": "/Online-Shopping/static/media/sugarImg.4492b2f7f6ee1312b450.jpg",
+    "static/media/attaImg.jpg": "/Online-Shopping/static/media/attaImg.04a6acc10524105359c9.jpg",
+    "static/media/groceryImg.jpg": "/Online-Shopping/static/media/groceryImg.d91379a7a4e2faf748c5.jpg",
+    "index.html": "/Online-Shopping/index.html",
+    "main.58ef40af.css.map": "/Online-Shopping/static/css/main.58ef40af.css.map",
+    "main.32b84bc7.js.map": "/Online-Shopping/static/js/main.32b84bc7.js.map",
+    "453.d7446e4a.chunk.js.map": "/Online-Shopping/static/js/453.d7446e4a.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.58ef40af.css",
+    "static/js/main.32b84bc7.js"
+  ]
+}
