@@ -26,8 +26,28 @@ export default function Checkout() {
   });
 
   const [error, setError] = useState("");
+      const [showCheckoutModal, setShowCheckoutModal] =
+      useState(false);
 
-  const placeOrder = async () => {
+    const [orderPlaced, setOrderPlaced] =
+      useState(false);
+      const handleCheckout = () => {
+      setError("");
+
+      if (!form.name || !form.mobile || !form.address) {
+        setError("Please fill in all delivery details.");
+        return;
+      }
+
+      if (cart.length === 0) {
+        setError("Your cart is empty.");
+        return;
+      }
+
+      setShowCheckoutModal(true);
+    };
+
+  const confirmOrder = async () => {
     setError("");
 
     if (!form.name || !form.mobile || !form.address) {
@@ -61,6 +81,18 @@ export default function Checkout() {
       return;
     }
     localStorage.removeItem("cart");
+
+      window.dispatchEvent(
+        new CustomEvent("cart_updated", {
+          detail: [],
+        })
+      );
+
+      setOrderPlaced(true);
+
+      setTimeout(() => {
+        navigate("/");
+      }, 2200);
 
     alert("🎉 Order placed successfully!");
     navigate("/");
@@ -124,7 +156,7 @@ export default function Checkout() {
 
           {/* BUTTON */}
           <button
-            onClick={placeOrder}
+            onClick={handleCheckout}
             className="mt-8 w-full py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-orange-400 text-white font-bold text-lg shadow-lg hover:scale-[1.02] transition"
           >
             Place Order • ₹{total.toFixed(2)}
@@ -179,6 +211,117 @@ export default function Checkout() {
         </div>
 
       </div>
+      {/* CHECKOUT MODAL */}
+{showCheckoutModal && (
+
+  <div
+    className="
+      fixed
+      inset-0
+      z-50
+      flex
+      items-center
+      justify-center
+      bg-black/50
+      backdrop-blur-sm
+      px-4
+      animate-fadeIn
+    "
+  >
+
+    <div
+      className="
+        bg-white
+        w-full
+        max-w-md
+        rounded-3xl
+        p-8
+        shadow-2xl
+        text-center
+        animate-scaleIn
+      "
+    >
+
+      {!orderPlaced ? (
+        <>
+
+          <div className="text-6xl mb-4">
+            🛍️
+          </div>
+
+          <h2 className="text-2xl font-extrabold text-slate-800">
+            Confirm Order
+          </h2>
+
+          <p className="text-slate-500 mt-3">
+            Are you sure you want to place this order?
+          </p>
+
+          <div className="mt-6 flex gap-3">
+
+            <button
+              onClick={() =>
+                setShowCheckoutModal(false)
+              }
+              className="
+                w-full
+                py-3
+                rounded-xl
+                border
+                border-slate-200
+                hover:bg-slate-100
+              "
+            >
+              Cancel
+            </button>
+
+            <button
+              onClick={confirmOrder}
+              className="
+                w-full
+                py-3
+                rounded-xl
+                bg-gradient-to-r
+                from-pink-500
+                to-orange-400
+                text-white
+                font-bold
+                hover:scale-105
+                transition
+              "
+            >
+              Confirm
+            </button>
+
+          </div>
+
+        </>
+      ) : (
+
+        <div className="py-6">
+
+          <div className="text-7xl animate-bounce">
+            🎉
+          </div>
+
+          <h2 className="mt-5 text-3xl font-extrabold text-green-600">
+            Order Confirmed!
+          </h2>
+
+          <p className="mt-3 text-slate-500">
+            Your order has been placed successfully.
+          </p>
+
+        </div>
+
+      )}
+
     </div>
+
+  </div>
+
+)}
+    </div>
+    
   );
 }

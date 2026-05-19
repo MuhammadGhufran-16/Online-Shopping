@@ -25,11 +25,19 @@ export default function EditProduct() {
 
         const data = docSnap.data();
         setProduct({
-          name: data.name || "",
-          price: data.price || "",
-          images: Array.isArray(data.images) ? data.images : data.image ? [data.image] : [],
-          category: data.category || "grocery",
-        });
+        name: data.name || "",
+        price: data.price || "",
+
+        description: data.description || "",
+
+        images: Array.isArray(data.images)
+          ? data.images
+          : data.image
+          ? [data.image]
+          : [],
+
+        category: data.category || "grocery",
+      });
       } catch (err) {
         console.error(err);
         setError("Failed to load product.");
@@ -88,21 +96,34 @@ export default function EditProduct() {
     if (!product) return;
     setError("");
 
-    if (!product.name || !product.price || product.images.length === 0) {
-      setError("Name, price and at least one image are required.");
-      return;
-    }
+        if (
+        !product.name ||
+        !product.price ||
+        !product.description ||
+        product.images.length === 0
+      ) {
+        setError(
+          "Name, price, description and at least one image are required."
+        );
+        return;
+      }
 
     try {
       setLoading(true);
       const docRef = doc(db, "products", id);
-      await updateDoc(docRef, {
-        name: product.name.trim(),
-        price: Number(product.price || 0),
-        images: product.images,
-        image: product.images[0],
-        category: product.category || "grocery",
-      });
+              await updateDoc(docRef, {
+          name: product.name.trim(),
+
+          price: Number(product.price || 0),
+
+          description: product.description.trim(),
+
+          images: product.images,
+
+          image: product.images[0],
+
+          category: product.category || "grocery",
+        });
 
       alert("✅ Product updated successfully!");
       navigate("/admin/products");
@@ -180,6 +201,35 @@ export default function EditProduct() {
               className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-pink-400 outline-none"
               placeholder="Enter price"
             />
+          </div>
+
+          {/* DESCRIPTION */}
+          <div>
+
+            <label className="text-sm font-medium text-slate-700">
+              Product Description
+            </label>
+
+            <textarea
+              value={product.description}
+              onChange={handleChange("description")}
+              rows={5}
+              placeholder="Enter product description"
+              className="
+                w-full
+                mt-1
+                px-4
+                py-3
+                rounded-xl
+                border
+                border-slate-200
+                focus:ring-2
+                focus:ring-pink-400
+                outline-none
+                resize-none
+              "
+            />
+
           </div>
 
           {/* IMAGES SECTION */}

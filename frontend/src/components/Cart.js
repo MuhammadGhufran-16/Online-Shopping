@@ -37,24 +37,53 @@ export default function Cart() {
     return () => window.removeEventListener("cart_updated", handler);
   }, []);
 
-  const increaseQty = (id) => {
-    const updated = cart.map((item) =>
-      item.id === id ? { ...item, qty: item.qty + 1 } : item
-    );
-    setCart(updated);
-    localStorage.setItem("cart", JSON.stringify(updated));
-  };
+        const increaseQty = (id) => {
+
+        const updated = cart.map((item) =>
+          item.id === id
+            ? { ...item, qty: item.qty + 1 }
+            : item
+        );
+
+        setCart(updated);
+
+        localStorage.setItem(
+          "cart",
+          JSON.stringify(updated)
+        );
+
+        window.dispatchEvent(
+          new CustomEvent("cart_updated", {
+            detail: updated,
+          })
+        );
+      };
 
   const decreaseQty = (id) => {
-    const updated = cart
-      .map((item) =>
-        item.id === id ? { ...item, qty: item.qty - 1 } : item
-      )
-      .filter((item) => item.qty > 0);
 
-    setCart(updated);
-    localStorage.setItem("cart", JSON.stringify(updated));
-  };
+      const updated = cart
+        .map((item) =>
+          item.id === id
+            ? { ...item, qty: item.qty - 1 }
+            : item
+        )
+        .filter((item) => item.qty > 0);
+
+      setCart(updated);
+
+      localStorage.setItem(
+        "cart",
+        JSON.stringify(updated)
+      );
+
+      window.dispatchEvent(
+        new CustomEvent("cart_updated", {
+          detail: updated,
+        })
+      );
+    };
+
+    
 
   const total = cart.reduce(
     (sum, item) => sum + item.price * item.qty,
@@ -109,7 +138,7 @@ export default function Cart() {
         {cart.map((item) => (
           <div
             key={item.id}
-            className="flex items-center gap-4 bg-white/80 backdrop-blur-xl border border-slate-100 shadow-md rounded-2xl p-4 hover:shadow-xl transition"
+            className="flex flex-col sm:flex-row sm:items-center gap-4 bg-white/80 backdrop-blur-xl border border-slate-100 shadow-md rounded-2xl p-4 hover:shadow-xl transition"
           >
 
             <img
@@ -119,10 +148,10 @@ export default function Cart() {
                 event.currentTarget.onerror = null;
                 event.currentTarget.src = fallbackProductImage;
               }}
-              className="w-20 h-20 object-cover rounded-xl border"
+              className="w-full sm:w-20 h-52 sm:h-20 object-cover rounded-xl border"
             />
 
-            <div className="flex-1">
+            <div className="flex-1 text-center sm:text-left">
               <h4 className="font-semibold text-slate-800">
                 {item.name}
               </h4>
@@ -132,7 +161,7 @@ export default function Cart() {
             </div>
 
             {/* QTY */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center gap-2">
 
               <button
                 onClick={() => decreaseQty(item.id)}
@@ -155,7 +184,7 @@ export default function Cart() {
             </div>
 
             {/* PRICE */}
-            <div className="text-right min-w-[80px]">
+            <div className="text-center sm:text-right min-w-[80px] w-full sm:w-auto">
               <p className="font-bold text-slate-800">
                 ₹ {(item.price * item.qty).toFixed(2)}
               </p>
@@ -187,12 +216,13 @@ export default function Cart() {
               Continue Shopping
             </Link>
 
-            <Link
-              to="/checkout"
-              className="px-6 py-3 rounded-full bg-white text-slate-900 font-bold hover:scale-105 transition"
-            >
-              Checkout
-            </Link>
+              <Link
+          to="/checkout"
+          className="
+            px-6 py-3 rounded-full bg-white text-slate-900 font-bold hover:scale-105 transition"
+        >
+          Checkout
+        </Link>
 
           </div>
 
@@ -200,6 +230,7 @@ export default function Cart() {
 
       </div>
 
+       
     </div>
   );
 }

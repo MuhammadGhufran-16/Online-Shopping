@@ -50,9 +50,9 @@ export default function ProductCard({ product, addToCart }) {
           {safeProduct.name}
         </h4>
 
-        <p className="text-sm text-slate-500 mt-1">
+        {/* <p className="text-sm text-slate-500 mt-1">
           Fresh & Quality Product
-        </p>
+        </p> */}
 
         {/* PRICE */}
         <div className="mt-3 flex items-center justify-between">

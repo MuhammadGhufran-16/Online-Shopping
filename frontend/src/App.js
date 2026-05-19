@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Grocery from "./pages/Grocery";
+import ProductDetails from "./pages/ProductDetails";
 import Search from "./pages/Search";
 import Cart from "./components/Cart";
 import CartDialog from "./components/CartDialog";
@@ -17,6 +18,7 @@ import EditProduct from "./admin/EditProduct";
 import OrdersList from "./admin/OrdersList";
 import AdminProductsList from "./admin/AdminProductsList";
 
+
 function App() {
   return (
     <BrowserRouter>
@@ -27,6 +29,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/grocery" element={<Grocery />} />
         <Route path="/search" element={<Search />} />
+        <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
 

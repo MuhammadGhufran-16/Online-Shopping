@@ -19,12 +19,13 @@ export default function AddProduct() {
 
   const navigate = useNavigate();
 
-  const [product, setProduct] = useState({
-    name: "",
-    price: "",
-    images: [],
-    category: "grocery",
-  });
+      const [product, setProduct] = useState({
+      name: "",
+      price: "",
+      description: "",
+      images: [],
+      category: "grocery",
+    });
 
   const [loading, setLoading] =
     useState(false);
@@ -89,8 +90,15 @@ export default function AddProduct() {
     try {
       setError("");
 
-      if (!product.name || !product.price || product.images.length === 0) {
-        setError("Name, price and images are required.");
+            if (
+        !product.name ||
+        !product.price ||
+        !product.description ||
+        product.images.length === 0
+      ) {
+        setError(
+          "Name, price, description and images are required."
+        );
         return;
       }
 
@@ -98,9 +106,14 @@ export default function AddProduct() {
         id: `prod_${Date.now()}`,
         name: product.name.trim(),
         price: Number(product.price || 0),
-        images: product.images,   // base64 strings
-        image: product.images[0], // base64 string
+
+        description: product.description.trim(),
+
+        images: product.images,
+        image: product.images[0],
+
         category: product.category,
+
         createdAt: new Date().toISOString(),
       };
 
@@ -193,6 +206,22 @@ export default function AddProduct() {
               )}
               placeholder="Enter price"
               className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200"
+            />
+
+          </div>
+          {/* DESCRIPTION */}
+          <div>
+
+            <label className="text-sm font-medium text-slate-700">
+              Product Description
+            </label>
+
+            <textarea
+              value={product.description}
+              onChange={handleChange("description")}
+              placeholder="Enter product description"
+              rows={5}
+              className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200 resize-none"
             />
 
           </div>
