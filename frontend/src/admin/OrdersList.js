@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { subscribeOrders } from "../utils/storeApi";
+import { updateOrder, deleteOrderById } from "../utils/storeApi";
+import { useEffect, useMemo, useState } from "react";
 
 const filters = [
   { id: "all", label: "All" },
@@ -9,26 +11,44 @@ const filters = [
 ];
 
 export default function OrdersList() {
-  const stored = JSON.parse(localStorage.getItem("orders")) || [];
+  const [orders, setOrders] = useState([]);
   const [activeFilter, setActiveFilter] = useState("today");
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+
+  useEffect(() => {
+  let unsubscribe = () => {};
+
+  const loadOrders = async () => {
+    unsubscribe = await subscribeOrders(
+      (firebaseOrders) => {
+        const formattedOrders = firebaseOrders.map((order) => ({
+          ...order,
+          cart: order.items || order.cart || [],
+        }));
+
+        setOrders(formattedOrders);
+      },
+      (error) => {
+        console.error("Failed to fetch orders:", error);
+      }
+    );
+  };
+
+  loadOrders();
+
+  return () => unsubscribe();
+}, []);
 
   const { filteredOrders, revenue } = useMemo(() => {
     const now = new Date();
-
     const startOfToday = new Date(
       now.getFullYear(),
       now.getMonth(),
       now.getDate()
     );
-
     const startOfWeek = new Date(startOfToday);
     startOfWeek.setDate(startOfWeek.getDate() - 6);
-
-    const startOfMonth = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      1
-    );
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const isInRange = (date) => {
       if (activeFilter === "today") return date >= startOfToday;
@@ -37,96 +57,123 @@ export default function OrdersList() {
       return true;
     };
 
-    const list = stored
-      .map((o) => ({ ...o, _date: new Date(o.time) }))
-      .filter((o) => !isNaN(o._date))
-      .filter((o) => isInRange(o._date))
-      .sort((a, b) => b._date - a._date);
+    const list = orders
+      .map((order) => ({
+        ...order,
+        _date: new Date(order.time),
+      }))
+      .filter((order) => !isNaN(order._date))
+      .filter((order) => isInRange(order._date))
+      .sort((first, second) => second._date - first._date);
 
-    const rev = list.reduce(
-      (sum, o) => sum + Number(o.total || 0),
+    const totalRevenue = list.reduce(
+      (sum, order) => sum + Number(order.total || 0),
       0
     );
 
-    return { filteredOrders: list, revenue: rev };
-  }, [stored, activeFilter]);
+    return { filteredOrders: list, revenue: totalRevenue };
+  }, [orders, activeFilter]);
+
+  const selectedOrder = useMemo(
+    () => orders.find((order) => String(order.id) === String(selectedOrderId)),
+    [orders, selectedOrderId]
+  );
+
+   const toggleCompleted = async (orderId) => {
+  const targetOrder = orders.find(
+    (order) => String(order.id) === String(orderId)
+  );
+
+  if (!targetOrder) return;
+
+  await updateOrder({
+    ...targetOrder,
+    completed: !targetOrder.completed,
+  });
+};
+
+  const deleteOrder = (orderId) => {
+    const confirmed = window.confirm(
+      `Delete order #${orderId}? This action cannot be undone.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    // const updatedOrders = orders.filter(
+    //   (order) => String(order.id) !== String(orderId)
+    // );
+    // setOrders(updatedOrders);
+    // localStorage.setItem("orders", JSON.stringify(updatedOrders));
+
+    // if (String(selectedOrderId) === String(orderId)) {
+    //   setSelectedOrderId(null);
+    // }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50 px-4 py-10">
-
-      {/* HEADER */}
       <div className="max-w-6xl mx-auto mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
         <div className="flex items-center gap-4">
           <Link
             to="/admin"
             className="p-2 rounded-full bg-white border border-slate-200 hover:bg-slate-100 transition shadow-sm"
           >
-            ←
+            Back
           </Link>
           <div>
-            <h1 className="text-4xl font-extrabold text-slate-800">
-              Orders 🧾
-            </h1>
+            <h1 className="text-4xl font-extrabold text-slate-800">Orders</h1>
             <p className="text-slate-500 mt-2">
-              Track customer purchases & revenue
+              Track customer purchases and manage status
             </p>
           </div>
         </div>
 
-        {/* FILTERS */}
         <div className="flex flex-wrap gap-2">
-          {filters.map((f) => (
+          {filters.map((filter) => (
             <button
-              key={f.id}
-              onClick={() => setActiveFilter(f.id)}
+              key={filter.id}
+              onClick={() => setActiveFilter(filter.id)}
               className={`px-4 py-2 text-xs font-semibold rounded-full border transition ${
-                activeFilter === f.id
+                activeFilter === filter.id
                   ? "bg-indigo-600 text-white border-indigo-600"
                   : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
               }`}
             >
-              {f.label}
+              {filter.label}
             </button>
           ))}
         </div>
-
       </div>
 
-      {/* REVENUE CARD */}
       <div className="max-w-6xl mx-auto mb-6">
-
         <div className="bg-white/70 backdrop-blur-xl border border-slate-200 shadow-lg rounded-2xl p-5 flex items-center justify-between">
-
           <div>
             <p className="text-sm text-slate-500">
-              Revenue ({filters.find((f) => f.id === activeFilter)?.label})
+              Revenue ({filters.find((filter) => filter.id === activeFilter)?.label})
             </p>
             <h2 className="text-3xl font-extrabold text-slate-800 mt-1">
-              ₹ {revenue.toFixed(2)}
+              Rs. {revenue.toFixed(2)}
             </h2>
           </div>
 
-          <div className="text-5xl">💰</div>
-
+          <div className="text-right">
+            <p className="text-sm text-slate-500">Orders</p>
+            <p className="text-3xl font-extrabold text-slate-800">
+              {filteredOrders.length}
+            </p>
+          </div>
         </div>
-
       </div>
 
-      {/* TABLE */}
       <div className="max-w-6xl mx-auto bg-white/70 backdrop-blur-xl border border-slate-200 shadow-xl rounded-3xl overflow-hidden">
-
-        {stored.length === 0 ? (
+        {orders.length === 0 ? (
           <div className="p-10 text-center">
-
-            <div className="text-6xl mb-3">🧾</div>
-            <h2 className="text-xl font-bold text-slate-800">
-              No Orders Yet
-            </h2>
+            <h2 className="text-xl font-bold text-slate-800">No Orders Yet</h2>
             <p className="text-slate-500 mt-2">
               Orders will appear here once customers purchase
             </p>
-
           </div>
         ) : filteredOrders.length === 0 ? (
           <div className="p-10 text-center text-slate-500">
@@ -134,10 +181,7 @@ export default function OrdersList() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-
             <table className="w-full text-sm">
-
-              {/* HEADER */}
               <thead className="bg-gradient-to-r from-slate-100 to-slate-50 text-slate-600">
                 <tr>
                   <th className="px-6 py-4 text-left">Date</th>
@@ -146,61 +190,209 @@ export default function OrdersList() {
                   <th className="px-6 py-4 text-left">Mobile</th>
                   <th className="px-6 py-4 text-left">Address</th>
                   <th className="px-6 py-4 text-center">Items</th>
+                  <th className="px-6 py-4 text-center">Status</th>
                   <th className="px-6 py-4 text-right">Total</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
 
-              {/* BODY */}
               <tbody>
-
-                {filteredOrders.map((o) => (
+                {filteredOrders.map((order) => (
                   <tr
-                    key={o.id}
+                    key={order.id}
                     className="border-b border-slate-100 hover:bg-pink-50/40 transition"
                   >
-
                     <td className="px-6 py-4 text-slate-700">
-                      {o._date.toLocaleDateString()}
+                      {order._date.toLocaleDateString()}
                     </td>
-
                     <td className="px-6 py-4 font-medium text-slate-800">
-                      #{o.id}
+                      #{order.id}
                     </td>
-
-                    <td className="px-6 py-4 text-slate-700">
-                      {o.name}
+                    <td className="px-6 py-4 text-slate-700">{order.name}</td>
+                    <td className="px-6 py-4 text-slate-700">{order.mobile}</td>
+                    <td className="px-6 py-4 text-slate-700 max-w-[220px] truncate">
+                      {order.address}
                     </td>
-
-                    <td className="px-6 py-4 text-slate-700">
-                      {o.mobile}
-                    </td>
-
-                    <td className="px-6 py-4 text-slate-700 max-w-[200px] truncate">
-                      {o.address}
-                    </td>
-
                     <td className="px-6 py-4 text-center">
-                      <span className="px-3 py-1 rounded-full bg-indigo-100 text-indigo-600 text-xs font-semibold">
-                        {o.cart?.length || 0}
-                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOrderId(order.id)}
+                        className="px-3 py-1 rounded-full bg-indigo-100 text-indigo-600 text-xs font-semibold hover:bg-indigo-200 transition"
+                      >
+                        {order.cart.length}
+                      </button>
                     </td>
-
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        type="button"
+                        onClick={() => toggleCompleted(order.id)}
+                        className={`px-3 py-1 rounded-full text-xs font-semibold border transition ${
+                          order.completed
+                            ? "bg-green-100 text-green-700 border-green-200"
+                            : "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100"
+                        }`}
+                      >
+                        {order.completed ? "Completed" : "Pending"}
+                      </button>
+                    </td>
                     <td className="px-6 py-4 text-right font-bold text-slate-800">
-                      ₹ {Number(o.total || 0).toFixed(2)}
+                      Rs. {Number(order.total || 0).toFixed(2)}
                     </td>
-
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedOrderId(order.id)}
+                          className="px-3 py-2 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200 transition"
+                        >
+                          View
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteOrder(order.id)}
+                          className="px-3 py-2 rounded-full bg-red-100 text-red-600 text-xs font-semibold hover:bg-red-200 transition"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
-
               </tbody>
-
             </table>
-
           </div>
         )}
-
       </div>
 
+      {selectedOrder && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+          <div className="w-full max-w-3xl max-h-[90vh] overflow-hidden rounded-3xl bg-white shadow-2xl">
+            <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
+              <div>
+                <p className="text-sm text-slate-500">Order #{selectedOrder.id}</p>
+                <h2 className="text-2xl font-bold text-slate-800">
+                  {selectedOrder.name}
+                </h2>
+                <p className="text-sm text-slate-500 mt-1">
+                  {new Date(selectedOrder.time).toLocaleString()}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedOrderId(null)}
+                className="rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="max-h-[calc(90vh-88px)] overflow-y-auto px-6 py-5">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Customer
+                  </p>
+                  <p className="mt-2 font-semibold text-slate-800">
+                    {selectedOrder.name}
+                  </p>
+                  <p className="mt-1 text-slate-600">{selectedOrder.mobile}</p>
+                  <p className="mt-1 text-slate-600">{selectedOrder.address}</p>
+                </div>
+
+                <div className="rounded-2xl bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    Summary
+                  </p>
+                  <div className="mt-2 flex items-center justify-between text-sm text-slate-600">
+                    <span>Items</span>
+                    <span>{selectedOrder.cart.length}</span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-sm text-slate-600">
+                    <span>Status</span>
+                    <span
+                      className={
+                        selectedOrder.completed
+                          ? "font-semibold text-green-700"
+                          : "font-semibold text-amber-700"
+                      }
+                    >
+                      {selectedOrder.completed ? "Completed" : "Pending"}
+                    </span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between text-sm text-slate-600">
+                    <span>Total</span>
+                    <span className="font-bold text-slate-800">
+                      Rs. {selectedOrder.total.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => toggleCompleted(selectedOrder.id)}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition ${
+                    selectedOrder.completed
+                      ? "bg-green-100 text-green-700 hover:bg-green-200"
+                      : "bg-amber-100 text-amber-700 hover:bg-amber-200"
+                  }`}
+                >
+                  {selectedOrder.completed
+                    ? "Mark as Pending"
+                    : "Mark as Completed"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => deleteOrder(selectedOrder.id)}
+                  className="px-4 py-2 rounded-full bg-red-100 text-red-600 text-sm font-semibold hover:bg-red-200 transition"
+                >
+                  Delete Order
+                </button>
+              </div>
+
+              <div className="mt-6 space-y-4">
+                {selectedOrder.cart.map((item) => (
+                  <div
+                    key={`${selectedOrder.id}-${item.id}`}
+                    className="flex items-center gap-4 rounded-2xl border border-slate-200 p-4"
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      onError={(event) => {
+                        event.currentTarget.onerror = null;
+                        event.currentTarget.src = "/images/groceryImg.jpg";
+                      }}
+                      className="h-20 w-20 rounded-2xl object-cover border border-slate-200"
+                    />
+
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-slate-800">{item.name}</h3>
+                      <p className="mt-1 text-sm text-slate-500">Qty: {item.qty}</p>
+                      <p className="text-sm text-slate-500">
+                        Price: Rs. {Number(item.price || item.productPrice || 0).toFixed(2)}
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-sm text-slate-500">Line Total</p>
+                      <p className="font-bold text-slate-800">
+                        Rs. {(
+                          Number(item.price || item.productPrice || 0) *
+                          Number(item.qty || 1)
+                        ).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

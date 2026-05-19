@@ -7,17 +7,8 @@ export default function Grocery() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    let data = JSON.parse(localStorage.getItem("products")) || [];
-
-    data = data.map((p, index) => ({
-      ...p,
-      id: p.id || `prod_${index}`,
-      price: Number(p.price || 0),
-    }));
-
-    localStorage.setItem("products", JSON.stringify(data));
-
-    setProducts(data.filter((p) => p.category === "grocery"));
+    const stored = JSON.parse(localStorage.getItem("products")) || [];
+    setProducts(stored.filter((product) => product.category === "grocery"));
   }, []);
 
   const addToCart = (product) => {

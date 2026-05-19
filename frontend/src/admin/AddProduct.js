@@ -23,8 +23,8 @@ export default function AddProduct() {
   const save = () => {
     setError("");
 
-    if (!product.name || !product.price) {
-      setError("Name and price are required.");
+    if (!product.name || !product.price || !product.image) {
+      setError("Name, price and image path are required.");
       return;
     }
 
@@ -36,9 +36,7 @@ export default function AddProduct() {
       category: product.category || "grocery",
     };
 
-    let products =
-      JSON.parse(localStorage.getItem("products")) || [];
-
+    let products = JSON.parse(localStorage.getItem("products")) || [];
     products.push(normalized);
     localStorage.setItem("products", JSON.stringify(products));
 
@@ -113,15 +111,28 @@ export default function AddProduct() {
           {/* IMAGE */}
           <div>
             <label className="text-sm font-medium text-slate-700">
-              Image URL
+              Image Path
             </label>
             <input
               value={product.image}
               onChange={handleChange("image")}
-              placeholder="https://image-link.com"
+              placeholder="images/groceryImg.jpg"
               className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-pink-400 outline-none"
             />
+            <p className="mt-2 text-xs text-slate-500">
+              Example: `images/groceryImg.jpg`
+            </p>
           </div>
+
+          {product.image.trim() && (
+            <div className="rounded-2xl border border-slate-200 p-3">
+              <img
+                src={product.image.trim().startsWith("images/") ? `/${product.image.trim()}` : product.image.trim()}
+                alt="preview"
+                className="h-28 w-full rounded-2xl object-cover shadow-sm"
+              />
+            </div>
+          )}
 
           {/* CATEGORY */}
           <div>

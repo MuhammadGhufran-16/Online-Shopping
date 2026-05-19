@@ -2,53 +2,28 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
-
-// local images from src/images folder (you created this)
-// Make sure these files exist: src/images/attaImg.jpg, sugarImg.jpg, oilImg.jpg
-import attaImg from "../images/attaImg.jpg";
-import sugarImg from "../images/sugarImg.jpg";
-import oilImg from "../images/oilImg.jpg";
+import { subscribeProducts } from "../utils/storeApi";
 
 export default function Home() {
   const [allProducts, setAllProducts] = useState([]);
 
   useEffect(() => {
-    const existing = JSON.parse(localStorage.getItem("products")) || [];
-    if (existing.length === 0) {
-      const seed = [
-        {
-          id: "p1",
-          name: "Aashirvaad Atta 5kg",
-          price: 420,
-          image: attaImg,
-          category: "grocery",
-        },
-        {
-          id: "p2",
-          name: "Organic Sugar 1kg",
-          price: 65,
-          image: sugarImg,
-          category: "grocery",
-        },
-        {
-          id: "p3",
-          name: "Sunflower Oil 1L",
-          price: 210,
-          image: oilImg,
-          category: "grocery",
-        },
-      ];
-      localStorage.setItem("products", JSON.stringify(seed));
-      setAllProducts(seed);
-    } else {
-      const normalized = existing.map((p, index) => ({
-        ...p,
-        id: p.id || `prod_${index}`,
-        price: Number(p.price || 0),
-      }));
-      localStorage.setItem("products", JSON.stringify(normalized));
-      setAllProducts(normalized.slice(0, 12));
-    }
+    let unsubscribe = () => {};
+
+    subscribeProducts(
+      (products) => {
+        setAllProducts(products.slice(0, 12));
+      },
+      (error) => {
+        console.error("products subscription error:", error);
+      }
+    ).then((cleanup) => {
+      unsubscribe = cleanup;
+    }).catch((error) => {
+      console.error("products load error:", error);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const addToCart = (product) => {

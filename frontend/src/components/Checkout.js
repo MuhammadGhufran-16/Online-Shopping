@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { normalizeProducts } from "../utils/productData";
+import { createOrder } from "../utils/storeApi";
 
 export default function Checkout() {
   const navigate = useNavigate();
 
-  const cart = (JSON.parse(localStorage.getItem("cart")) || []).map(
-    (item) => ({
-      ...item,
-      qty: Number(item.qty || 1),
-      price: Number(item.price || 0),
-    })
-  );
+  const cart = normalizeProducts(
+    JSON.parse(localStorage.getItem("cart")) || []
+  ).map((item) => ({
+    ...item,
+    qty: Number(item.qty || 1),
+    price: Number(item.price || 0),
+  }));
 
   const total = cart.reduce(
     (sum, item) => sum + item.price * item.qty,
@@ -25,7 +27,7 @@ export default function Checkout() {
 
   const [error, setError] = useState("");
 
-  const placeOrder = () => {
+  const placeOrder = async () => {
     setError("");
 
     if (!form.name || !form.mobile || !form.address) {
@@ -38,17 +40,26 @@ export default function Checkout() {
       return;
     }
 
-    let orders = JSON.parse(localStorage.getItem("orders")) || [];
-
-    orders.push({
-      id: Date.now(),
-      ...form,
-      cart,
-      total,
-      time: new Date().toString(),
-    });
-
-    localStorage.setItem("orders", JSON.stringify(orders));
+    try {
+      await createOrder({
+        id: Date.now(),
+        name: form.name,
+        mobile: form.mobile,
+        address: form.address,
+        items: cart.map((item) => ({
+          productName: item.name,
+          productPrice: Number(item.price || 0),
+          qty: Number(item.qty || 1),
+        })),
+        total,
+        completed: false,
+        time: new Date().toString(),
+      });
+    } catch (err) {
+      console.error("create order error:", err);
+      setError("Failed to place order in Firebase.");
+      return;
+    }
     localStorage.removeItem("cart");
 
     alert("🎉 Order placed successfully!");

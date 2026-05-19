@@ -1,28 +1,40 @@
 // src/pages/Search.js
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
+import { subscribeProducts } from "../utils/storeApi";
 
 export default function Search() {
   const [keyword, setKeyword] = useState("");
   const [results, setResults] = useState([]);
   const [touched, setTouched] = useState(false);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    let unsubscribe = () => {};
+
+    subscribeProducts(
+      (items) => {
+        setProducts(items);
+      },
+      (error) => {
+        console.error("products subscription error:", error);
+      }
+    ).then((cleanup) => {
+      unsubscribe = cleanup;
+    }).catch((error) => {
+      console.error("products load error:", error);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const searchNow = () => {
     setTouched(true);
 
-    let data = JSON.parse(localStorage.getItem("products")) || [];
-
-    data = data.map((p, index) => ({
-      ...p,
-      id: p.id || `prod_${index}`,
-      price: Number(p.price || 0),
-    }));
-
     const term = keyword.trim().toLowerCase();
 
     const match = term
-      ? data.filter((p) =>
+      ? products.filter((p) =>
           p.name.toLowerCase().includes(term)
         )
       : [];

@@ -1,8 +1,13 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function AdminProductsList() {
-  const products =
-    JSON.parse(localStorage.getItem("products")) || [];
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("products")) || [];
+    setProducts(stored);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50 px-4 py-10">
@@ -83,6 +88,10 @@ export default function AdminProductsList() {
                       <img
                         src={p.image}
                         alt={p.name}
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = "/images/groceryImg.jpg";
+                        }}
                         className="w-12 h-12 rounded-xl object-cover border shadow-sm"
                       />
 
@@ -114,12 +123,14 @@ export default function AdminProductsList() {
                     {/* ACTIONS */}
                     <td className="px-6 py-4 text-right">
 
-                      <Link
-                        to={`/admin/edit/${p.id}`}
-                        className="px-4 py-2 rounded-full bg-indigo-600 text-white text-xs font-semibold shadow hover:scale-105 transition"
-                      >
-                        Edit
-                      </Link>
+                      <div className="flex items-center justify-end gap-3">
+                        <Link
+                          to={`/admin/edit/${p.id}`}
+                          className="px-4 py-2 rounded-full bg-indigo-600 text-white text-xs font-semibold shadow hover:scale-105 transition"
+                        >
+                          Edit
+                        </Link>
+                      </div>
 
                     </td>
 

@@ -1,4 +1,8 @@
-import defaultGrocery from "../images/groceryImg.jpg";
+import { useState } from "react";
+import {
+  fallbackProductImage,
+  getProductImage,
+} from "../utils/productData";
 
 export default function ProductCard({ product, addToCart }) {
   const safeProduct = {
@@ -7,7 +11,19 @@ export default function ProductCard({ product, addToCart }) {
     id: product?.id,
   };
 
-  const fallbackImage = defaultGrocery;
+  const [imgError, setImgError] = useState(false);
+
+  const handleImageError = () => {
+    setImgError(true);
+  };
+
+  const getImageSrc = () => {
+    if (imgError) {
+      return fallbackProductImage;
+    }
+
+    return getProductImage(safeProduct);
+  };
 
   return (
     <div className="group bg-white/70 backdrop-blur-xl border border-slate-100 shadow-md rounded-3xl overflow-hidden hover:shadow-2xl hover:-translate-y-2 transition duration-300 flex flex-col">
@@ -16,9 +32,10 @@ export default function ProductCard({ product, addToCart }) {
       <div className="relative overflow-hidden">
 
         <img
-          src={safeProduct.image || fallbackImage}
+          src={getImageSrc()}
           alt={safeProduct.name || ""}
           className="w-full h-44 object-cover group-hover:scale-110 transition duration-500"
+          onError={handleImageError}
         />
 
         {/* overlay glow */}

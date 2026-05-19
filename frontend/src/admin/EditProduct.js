@@ -38,12 +38,11 @@ export default function EditProduct() {
     setError("");
 
     if (!product.name || !product.price || !product.image) {
-      setError("All fields are required.");
+      setError("Name, price and image path are required.");
       return;
     }
 
     let products = JSON.parse(localStorage.getItem("products")) || [];
-
     products = products.map((p) =>
       String(p.id) === String(product.id)
         ? {
@@ -57,7 +56,6 @@ export default function EditProduct() {
     );
 
     localStorage.setItem("products", JSON.stringify(products));
-
     alert("✅ Product updated successfully!");
     navigate("/admin/products");
   };
@@ -116,12 +114,12 @@ export default function EditProduct() {
         )}
 
         {/* IMAGE PREVIEW */}
-        {product.image && (
+        {product.image.trim() && (
           <div className="mb-6">
             <img
-              src={product.image}
+              src={product.image.trim().startsWith("images/") ? `/${product.image.trim()}` : product.image.trim()}
               alt="preview"
-              className="w-full h-48 object-cover rounded-2xl border shadow-sm"
+              className="h-28 w-full rounded-2xl border object-cover shadow-sm"
             />
           </div>
         )}
@@ -158,14 +156,17 @@ export default function EditProduct() {
           {/* IMAGE */}
           <div>
             <label className="text-sm font-medium text-slate-700">
-              Image URL
+              Image Path
             </label>
             <input
               value={product.image}
               onChange={handleChange("image")}
               className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-pink-400 outline-none"
-              placeholder="Paste image URL"
+              placeholder="images/groceryImg.jpg"
             />
+            <p className="mt-2 text-xs text-slate-500">
+              Example: `images/groceryImg.jpg`
+            </p>
           </div>
 
           {/* CATEGORY */}

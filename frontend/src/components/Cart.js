@@ -1,5 +1,9 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import {
+  fallbackProductImage,
+  normalizeProducts,
+} from "../utils/productData";
 
 export default function Cart() {
   const [cart, setCart] = useState([]);
@@ -8,19 +12,20 @@ export default function Cart() {
     let saved = JSON.parse(localStorage.getItem("cart")) || [];
     if (!Array.isArray(saved)) saved = [];
 
-    saved = saved.map((item) => ({
+    saved = normalizeProducts(saved).map((item) => ({
       ...item,
       qty: Number(item?.qty || 1),
       price: Number(item?.price || 0),
     }));
 
     setCart(saved);
+    localStorage.setItem("cart", JSON.stringify(saved));
   }, []);
 
   useEffect(() => {
     const handler = (e) => {
       const detail = e.detail || [];
-      const normalised = detail.map((item) => ({
+      const normalised = normalizeProducts(detail).map((item) => ({
         ...item,
         qty: Number(item.qty || 1),
         price: Number(item.price || 0),
@@ -110,6 +115,10 @@ export default function Cart() {
             <img
               src={item.image}
               alt={item.name}
+              onError={(event) => {
+                event.currentTarget.onerror = null;
+                event.currentTarget.src = fallbackProductImage;
+              }}
               className="w-20 h-20 object-cover rounded-xl border"
             />
 
