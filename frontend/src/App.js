@@ -21,7 +21,7 @@ import AdminProductsList from "./admin/AdminProductsList";
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/Online-Shopping">
       <Navbar />
       <CartDialog />
 
