@@ -70,15 +70,14 @@ export default function Home() {
           </span>
 
           <h1 className="mt-5 text-4xl md:text-6xl font-extrabold leading-tight">
-            Shop Everyday Essentials
+            Style Everyday Elegance
             <span className="block text-cyan-200">
-              With Premium Experience
+              With a Premium Fashion Experience
             </span>
           </h1>
 
           <p className="mt-5 text-indigo-100 text-lg leading-relaxed">
-            Discover groceries, household products, and daily essentials
-            at affordable prices with fast and secure shopping.
+            Discover trendy sarees, ethnic wear, and stylish clothing collections at affordable prices with seamless and secure shopping..
           </p>
 
           <div className="mt-8 flex flex-wrap gap-4">

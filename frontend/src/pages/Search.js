@@ -96,7 +96,7 @@ export default function Search() {
           </h1>
 
           <p className="mt-6 text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
-            Find your favorite grocery products instantly with smart search.
+            Find your favorite sarees and ethnic wear instantly with smart search.
           </p>
 
           {/* SEARCH BOX */}

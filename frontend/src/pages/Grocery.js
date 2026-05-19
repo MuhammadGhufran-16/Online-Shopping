@@ -55,12 +55,11 @@ export default function Grocery() {
 
         <div className="relative max-w-7xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl font-extrabold leading-tight">
-             Smart Online Shopping 🚚
+             Premium Sarees & Ethnic Collections 💖
           </h1>
 
           <p className="mt-6 text-lg md:text-xl text-white/90 max-w-2xl mx-auto">
-            Discover trending products, fashion, electronics, accessories,
-  home essentials, and more — all in one place.
+            Explore beautiful sarees, designer outfits, fashion accessories, and everyday styles crafted for every occasion.
           </p>
 
           <div className="mt-8 inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/20 backdrop-blur-lg border border-white/30">

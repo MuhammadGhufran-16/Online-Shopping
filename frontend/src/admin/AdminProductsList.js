@@ -1,13 +1,59 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { db } from "../firebase"; 
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 export default function AdminProductsList() {
   const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("products")) || [];
-    setProducts(stored);
+    fetchProducts();
   }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "products"));
+      const items = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+        docId: doc.id,
+      }));
+      setProducts(items);
+    } catch (err) {
+      console.error("Failed to fetch products:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /* DELETE PRODUCT */
+  const handleDelete = async (docId, productName) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${productName}"?`
+    );
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(docId);
+      await deleteDoc(doc(db, "products", docId));
+      // Remove from local state instantly (no need to refetch)
+      setProducts((prev) => prev.filter((p) => p.docId !== docId));
+    } catch (err) {
+      console.error("Failed to delete product:", err);
+      alert("Failed to delete product. Please try again.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-slate-500">Loading products...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50 px-4 py-10">
@@ -46,17 +92,13 @@ export default function AdminProductsList() {
 
         {products.length === 0 ? (
           <div className="p-10 text-center">
-
             <div className="text-6xl mb-4">📦</div>
-
             <h2 className="text-xl font-bold text-slate-800">
               No Products Found
             </h2>
-
             <p className="text-slate-500 mt-2">
               Start by adding your first product
             </p>
-
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -75,44 +117,34 @@ export default function AdminProductsList() {
 
               {/* BODY */}
               <tbody>
-
-                {products.map((p, index) => (
+                {products.map((p) => (
                   <tr
-                    key={p.id}
+                    key={p.docId}
                     className="border-b border-slate-100 hover:bg-pink-50/40 transition"
                   >
 
                     {/* PRODUCT */}
                     <td className="px-6 py-4 flex items-center gap-3">
-
                       <img
                         src={p.image}
                         alt={p.name}
-                        onError={(event) => {
-                          event.currentTarget.onerror = null;
-                          event.currentTarget.src = "/images/groceryImg.jpg";
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = "/images/groceryImg.jpg";
                         }}
                         className="w-12 h-12 rounded-xl object-cover border shadow-sm"
                       />
-
                       <div>
-                        <p className="font-semibold text-slate-800">
-                          {p.name}
-                        </p>
-                        <p className="text-xs text-slate-400">
-                          ID: {p.id}
-                        </p>
+                        <p className="font-semibold text-slate-800">{p.name}</p>
+                        <p className="text-xs text-slate-400">ID: {p.id}</p>
                       </div>
-
                     </td>
 
                     {/* CATEGORY */}
                     <td className="px-6 py-4">
-
                       <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-600">
                         {p.category || "grocery"}
                       </span>
-
                     </td>
 
                     {/* PRICE */}
@@ -122,21 +154,28 @@ export default function AdminProductsList() {
 
                     {/* ACTIONS */}
                     <td className="px-6 py-4 text-right">
-
                       <div className="flex items-center justify-end gap-3">
+
                         <Link
-                          to={`/admin/edit/${p.id}`}
+                          to={`/admin/edit/${p.docId}`}
                           className="px-4 py-2 rounded-full bg-indigo-600 text-white text-xs font-semibold shadow hover:scale-105 transition"
                         >
                           Edit
                         </Link>
-                      </div>
 
+                        <button
+                          onClick={() => handleDelete(p.docId, p.name)}
+                          disabled={deletingId === p.docId}
+                          className="px-4 py-2 rounded-full bg-red-500 text-white text-xs font-semibold shadow hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {deletingId === p.docId ? "Deleting..." : "Delete"}
+                        </button>
+
+                      </div>
                     </td>
 
                   </tr>
                 ))}
-
               </tbody>
 
             </table>
