@@ -1,19 +1,17 @@
 // src/pages/ProductDetails.js
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 export default function ProductDetails() {
-
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
-
   const [selectedImage, setSelectedImage] = useState("");
+  const [cartQty, setCartQty] = useState(0); // 👈 NEW
 
+  // Load product
   useEffect(() => {
-
     const stored = JSON.parse(localStorage.getItem("products")) || [];
 
     const found = stored.find((item) => item.id.toString() === id);
@@ -23,8 +21,20 @@ export default function ProductDetails() {
     if (found?.images?.length > 0) {
       setSelectedImage(found.images[0]);
     }
-
   }, [id]);
+
+  // Check cart quantity for this product
+  useEffect(() => {
+    if (!product) return;
+
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    const existing = cart.find(
+      (item) => String(item.id) === String(product.id)
+    );
+
+    setCartQty(existing ? existing.qty : 0);
+  }, [product]);
 
   if (!product) {
     return (
@@ -33,143 +43,91 @@ export default function ProductDetails() {
       </div>
     );
   }
-  const addToCart = (product) => {
-  try {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    const normalized = {
-      ...product,
-      id: product.id,
-      price: Number(product.price || 0),
-    };
+  // ADD TO CART
+  const addToCart = () => {
+    try {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    const existing = cart.find((item) => item.id === normalized.id);
+      const existing = cart.find(
+        (item) => String(item.id) === String(product.id)
+      );
 
-    if (existing) {
-      existing.qty = Number(existing.qty || 0) + 1;
-    } else {
-      cart.push({ ...normalized, qty: 1 });
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ ...product, qty: 1 });
+      }
+
+      localStorage.setItem("cart", JSON.stringify(cart));
+
+      window.dispatchEvent(
+        new CustomEvent("cart_updated", { detail: cart })
+      );
+
+      // update UI instantly
+      const updated = cart.find(
+        (item) => String(item.id) === String(product.id)
+      );
+
+      setCartQty(updated.qty);
+
+    } catch (err) {
+      console.error("addToCart error:", err);
     }
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-
-    window.dispatchEvent(
-      new CustomEvent("cart_updated", { detail: cart })
-    );
-
-    alert("Added to cart");
-
-  } catch (err) {
-    console.error("addToCart error:", err);
-    alert("Failed to add to cart");
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-slate-100 py-10 px-6">
-                    {/* BACK BUTTON */}
-            <div className="max-w-6xl mx-auto mb-5">
 
-            <button
-                onClick={() => navigate(-1)}
-                className="
-                flex
-                items-center
-                gap-2
-                px-5
-                py-3
-                rounded-full
-                bg-white
-                border
-                border-slate-200
-                shadow-sm
-                hover:shadow-md
-                hover:scale-105
-                transition
-                text-slate-700
-                font-medium
-                "
-            >
-
-                <span className="text-xl">
-                ←
-                </span>
-
-                <span>
-                Back
-                </span>
-
-            </button>
-
-            </div>
+      {/* BACK BUTTON */}
+      <div className="max-w-6xl mx-auto mb-5">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 px-5 py-3 rounded-full bg-white border border-slate-200 shadow-sm hover:shadow-md hover:scale-105 transition text-slate-700 font-medium"
+        >
+          <span className="text-xl">←</span>
+          <span>Back</span>
+        </button>
+      </div>
 
       <div className="max-w-6xl mx-auto bg-white rounded-3xl shadow-xl p-8 grid md:grid-cols-2 gap-10">
 
         {/* LEFT SIDE */}
-            <div className="w-full">
+        <div className="w-full">
 
-            {/* MAIN IMAGE */}
-            <div className="w-full rounded-2xl border bg-white overflow-hidden">
+          <div className="w-full rounded-2xl border bg-white overflow-hidden">
+            <div className="flex items-center justify-center bg-slate-50">
 
-                <div className="flex items-center justify-center bg-slate-50">
-
-                <img
-                    src={selectedImage}
-                    alt={product.name}
-                    className="
-                    w-full
-                    h-[300px]
-                    sm:h-[400px]
-                    md:h-[500px]
-                    object-contain
-                    transition-all
-                    duration-300
-                    "
-                />
-
-                </div>
+              <img
+                src={selectedImage}
+                alt={product.name}
+                className="w-full h-[300px] sm:h-[400px] md:h-[500px] object-contain"
+              />
 
             </div>
+          </div>
 
-            {/* MULTIPLE IMAGES */}
-            <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
+          {/* THUMBNAILS */}
+          <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
 
-                {product.images?.map((img, index) => (
+            {product.images?.map((img, index) => (
+              <button
+                key={index}
+                onClick={() => setSelectedImage(img)}
+                className={`min-w-[80px] w-20 h-20 rounded-xl overflow-hidden border-2 bg-white flex-shrink-0 transition ${
+                  selectedImage === img
+                    ? "border-pink-500"
+                    : "border-slate-200"
+                }`}
+              >
+                <img src={img} className="w-full h-full object-cover" />
+              </button>
+            ))}
 
-                <button
-                    key={index}
-                    onClick={() => setSelectedImage(img)}
-                    className={`
-                    min-w-[80px]
-                    w-20
-                    h-20
-                    rounded-xl
-                    overflow-hidden
-                    border-2
-                    bg-white
-                    flex-shrink-0
-                    transition
-                    ${
-                        selectedImage === img
-                        ? "border-pink-500"
-                        : "border-slate-200"
-                    }
-                    `}
-                >
+          </div>
 
-                    <img
-                    src={img}
-                    alt={`thumb-${index}`}
-                    className="w-full h-full object-cover"
-                    />
-
-                </button>
-
-                ))}
-
-            </div>
-
-            </div>
+        </div>
 
         {/* RIGHT SIDE */}
         <div className="flex flex-col justify-center">
@@ -186,17 +144,19 @@ export default function ProductDetails() {
             {product.description}
           </p>
 
+          {/* BUTTON */}
           <button
-          onClick={() => addToCart(product)}
-          className="mt-10 px-8 py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-orange-400 text-white text-lg font-bold shadow-lg hover:scale-105 transition"
-        >
-          Add To Cart
-        </button>
+            onClick={addToCart}
+            className="mt-10 px-8 py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-orange-400 text-white text-lg font-bold shadow-lg hover:scale-105 transition"
+          >
+            {cartQty > 0
+              ? `Added to Cart (+${cartQty})`
+              : "Add To Cart 🛒"}
+          </button>
 
         </div>
 
       </div>
-
     </div>
   );
 }

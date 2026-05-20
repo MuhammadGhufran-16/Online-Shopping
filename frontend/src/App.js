@@ -6,10 +6,12 @@ import Home from "./pages/Home";
 import Grocery from "./pages/Grocery";
 import ProductDetails from "./pages/ProductDetails";
 import Search from "./pages/Search";
+import Payment from "./pages/Payment";
 import Cart from "./components/Cart";
 import CartDialog from "./components/CartDialog";
 import Checkout from "./components/Checkout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import FloatingCart from "./components/FloatingCart";
 import Footer from "./components/Footer";
 
 import AdminMenu from "./admin/AdminMenu";
@@ -25,6 +27,7 @@ function App() {
     <BrowserRouter basename="/Online-Shopping">
       <Navbar />
       <CartDialog />
+      <FloatingCart />
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -33,6 +36,7 @@ function App() {
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/payment" element={<Payment />} />
 
         {/* Admin */}
         <Route path="/admin/login" element={<AdminLogin />} />

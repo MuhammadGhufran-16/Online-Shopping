@@ -71,20 +71,26 @@ export default function Checkout() {
     const [orderPlaced, setOrderPlaced] =
       useState(false);
       const handleCheckout = () => {
-      setError("");
+          setError("");
 
-      if (!form.name || !form.mobile || !form.address) {
-        setError("Please fill in all delivery details.");
-        return;
-      }
+          if (!form.name || !form.mobile || !form.address) {
+            setError("Please fill in all delivery details.");
+            return;
+          }
 
-      if (cart.length === 0) {
-        setError("Your cart is empty.");
-        return;
-      }
+          if (cart.length === 0) {
+            setError("Your cart is empty.");
+            return;
+          }
 
-      setShowCheckoutModal(true);
-    };
+          navigate("/payment", {
+            state: {
+              form,
+              cart,
+              total,
+            },
+          });
+        };
 
   const confirmOrder = async () => {
     setError("");

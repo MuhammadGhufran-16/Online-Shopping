@@ -90,48 +90,8 @@ export default function Home() {
 
   return (
   <div className="min-h-screen bg-gradient-to-b from-slate-100 to-white">
-    {/* FLOATING CART BUTTON */}
-      <button
-        onClick={() => navigate("/cart")}
-        className="
-          fixed top-[25.35rem] right-5 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-pink-500 to-orange-400
-          text-white shadow-2xl flex items-center justify-center hover:scale-110 transition
-        "
-      >
-
-        <span className="text-2xl">
-          🛒
-        </span>
-
-        {/* BADGE */}
-        {cartCount > 0 && (
-
-          <span
-            className="
-              absolute
-              -top-1
-              -right-1
-              min-w-[24px]
-              h-6
-              px-1
-              rounded-full
-              bg-red-500
-              text-white
-              text-xs
-              font-bold
-              flex
-              items-center
-              justify-center
-              border-2
-              border-white
-            "
-          >
-            {cartCount}
-          </span>
-
-        )}
-
-      </button>
+  
+      
     <div className="max-w-7xl mx-auto px-4 py-8">
 
       {/* HERO SECTION */}

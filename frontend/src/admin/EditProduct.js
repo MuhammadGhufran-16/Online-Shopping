@@ -296,15 +296,17 @@ export default function EditProduct() {
 
           {/* CATEGORY */}
           <div>
-            <label className="text-sm font-medium text-slate-700">Category</label>
-            <select
+            <label className="text-sm font-medium text-slate-700">
+              Category
+            </label>
+
+            <input
+              type="text"
               value={product.category}
               onChange={handleChange("category")}
-              className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-pink-400 outline-none"
-            >
-              <option value="grocery">Grocery</option>
-              <option value="other">Other</option>
-            </select>
+              placeholder="Enter category (e.g. grocery, electronics)"
+              className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200"
+            />
           </div>
 
         </div>

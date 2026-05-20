@@ -301,25 +301,13 @@ export default function AddProduct() {
               Category
             </label>
 
-            <select
-              value={
-                product.category
-              }
-              onChange={handleChange(
-                "category"
-              )}
+            <input
+              type="text"
+              value={product.category}
+              onChange={handleChange("category")}
+              placeholder="Enter category (e.g. grocery, fashion, electronics)"
               className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200"
-            >
-
-              <option value="grocery">
-                Grocery
-              </option>
-
-              <option value="other">
-                Other
-              </option>
-
-            </select>
+            />
 
           </div>
 
