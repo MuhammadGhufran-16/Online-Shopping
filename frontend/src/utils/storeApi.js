@@ -41,8 +41,10 @@ const normalizeOrder = (order = {}, index = 0) => ({
   address: String(order.address || "").trim(),
   total: Number(order.total || 0),
   completed: Boolean(order.completed),
+  paymentConfirmed: Boolean(order.paymentConfirmed),
   time: order.time || new Date().toString(),
   items: normalizeOrderItems(order),
+  cart: Array.isArray(order.cart) ? order.cart : normalizeOrderItems(order),
 });
 
 const normalizeOrders = (orders = []) => {

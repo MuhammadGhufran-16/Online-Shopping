@@ -76,54 +76,55 @@ export default function OrdersList() {
     loadOrders();
     return () => unsubscribe();
   }, []);
-
-  const { filteredOrders, revenue } = useMemo(() => {
-    const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startOfWeek = new Date(startOfToday);
-    startOfWeek.setDate(startOfWeek.getDate() - 6);
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    const isInRange = (date) => {
-
-        // DATE PICKER FILTER
-        if (selectedDate) {
-
-          const picked = new Date(selectedDate);
-
-          return (
-            date.getFullYear() === picked.getFullYear() &&
-            date.getMonth() === picked.getMonth() &&
-            date.getDate() === picked.getDate()
-          );
+        const togglePayment = async (order) => {
+        try {
+          await updateOrder({
+            ...order,
+            paymentConfirmed: !order.paymentConfirmed,
+          });
+        } catch (err) {
+          console.error("Payment update failed:", err);
         }
-
-        // DEFAULT FILTERS
-        if (activeFilter === "today") {
-          return date >= startOfToday;
-        }
-
-        if (activeFilter === "week") {
-          return date >= startOfWeek;
-        }
-
-        if (activeFilter === "month") {
-          return date >= startOfMonth;
-        }
-
-        return true;
       };
 
-    const list = orders
-      .map((order) => ({ ...order, _date: new Date(order.time) }))
-      .filter((order) => !isNaN(order._date))
-      .filter((order) => isInRange(order._date))
-      .sort((a, b) => b._date - a._date);
+        const { filteredOrders, revenue } = useMemo(() => {
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const startOfWeek = new Date(startOfToday);
+        startOfWeek.setDate(startOfWeek.getDate() - 6);
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const totalRevenue = list.reduce((sum, order) => sum + Number(order.total || 0), 0);
+        const isInRange = (date) => {
+          if (selectedDate) {
+            const picked = new Date(selectedDate);
 
-    return { filteredOrders: list, revenue: totalRevenue };
-    }, [orders, activeFilter, selectedDate]);
+            return (
+              date.getFullYear() === picked.getFullYear() &&
+              date.getMonth() === picked.getMonth() &&
+              date.getDate() === picked.getDate()
+            );
+          }
+
+          if (activeFilter === "today") return date >= startOfToday;
+          if (activeFilter === "week") return date >= startOfWeek;
+          if (activeFilter === "month") return date >= startOfMonth;
+
+          return true;
+        };
+
+        const list = orders
+          .map((order) => ({ ...order, _date: new Date(order.time) }))
+          .filter((order) => !isNaN(order._date))
+          .filter((order) => isInRange(order._date))
+          .sort((a, b) => b._date - a._date);
+
+        const totalRevenue = list.reduce((sum, order) => {
+          if (!order.paymentConfirmed) return sum;
+          return sum + Number(order.total || 0);
+        }, 0);
+
+        return { filteredOrders: list, revenue: totalRevenue };
+      }, [orders, activeFilter, selectedDate]);
 
   const selectedOrder = useMemo(
     () => orders.find((order) => String(order.id) === String(selectedOrderId)),
@@ -261,6 +262,7 @@ export default function OrdersList() {
                   <th className="px-6 py-4 text-left">Address</th>
                   <th className="px-6 py-4 text-center">Items</th>
                   <th className="px-6 py-4 text-center">Status</th>
+                  <th className="px-6 py-4 text-center">Payment</th>
                   <th className="px-6 py-4 text-right">Total</th>
                   <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
@@ -323,6 +325,18 @@ export default function OrdersList() {
                         {order.completed ? "Completed" : "Pending"}
                       </button>
                     </td>
+                   <td className="px-6 py-4 text-center">
+                  <button
+                    onClick={() => togglePayment(order)}
+                    className={`px-4 py-1 rounded-full text-xs font-bold transition shadow-sm
+                      ${order.paymentConfirmed
+                        ? "bg-green-100 text-green-700 border border-green-200"
+                        : "bg-red-100 text-red-600 border border-red-200"
+                      }`}
+                  >
+                    {order.paymentConfirmed ? "✔ Paid" : "✖ Unpaid"}
+                  </button>
+                </td>
                     <td className="px-6 py-4 text-right font-bold text-slate-800">
                       Rs. {Number(order.total || 0).toFixed(2)}
                     </td>
