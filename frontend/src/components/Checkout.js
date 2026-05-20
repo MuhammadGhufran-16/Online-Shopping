@@ -70,79 +70,27 @@ export default function Checkout() {
 
     const [orderPlaced, setOrderPlaced] =
       useState(false);
-      const handleCheckout = () => {
-          setError("");
+const handleCheckout = () => {
+  setError("");
 
-          if (!form.name || !form.mobile || !form.address) {
-            setError("Please fill in all delivery details.");
-            return;
-          }
+  if (!form.name || !form.mobile || !form.address) {
+    setError("Please fill in all delivery details.");
+    return;
+  }
 
-          if (cart.length === 0) {
-            setError("Your cart is empty.");
-            return;
-          }
+  if (cart.length === 0) {
+    setError("Your cart is empty.");
+    return;
+  }
 
-          navigate("/payment", {
-            state: {
-              form,
-              cart,
-              total,
-            },
-          });
-        };
-
-  const confirmOrder = async () => {
-    setError("");
-
-    if (!form.name || !form.mobile || !form.address) {
-      setError("Please fill in all delivery details.");
-      return;
-    }
-
-    if (cart.length === 0) {
-      setError("Your cart is empty.");
-      return;
-    }
-
-    try {
-      await createOrder({
-        id: Date.now(),
-        name: form.name,
-        mobile: form.mobile,
-        address: form.address,
-        items: cart.map((item) => ({
-          productName: item.name,
-          productPrice: Number(item.price || 0),
-          qty: Number(item.qty || 1),
-        })),
-        total,
-        completed: false,
-        time: new Date().toString(),
-      });
-    } catch (err) {
-      console.error("create order error:", err);
-      setError("Failed to place order in Firebase.");
-      return;
-    }
-    localStorage.removeItem("cart");
-
-      window.dispatchEvent(
-        new CustomEvent("cart_updated", {
-          detail: [],
-        })
-      );
-
-      setOrderPlaced(true);
-
-      setTimeout(() => {
-        navigate("/");
-      }, 2200);
-
-    // alert("🎉 Order placed successfully!");
-    setShowWhatsappPopup(true);
-    navigate("/");
-  };
+  navigate("/payment", {
+    state: {
+      form,
+      cart,
+      total,
+    },
+  });
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50 px-4 py-10">
@@ -322,7 +270,7 @@ export default function Checkout() {
             </button>
 
             <button
-              onClick={confirmOrder}
+              onClick={handleCheckout}
               className="
                 w-full
                 py-3
