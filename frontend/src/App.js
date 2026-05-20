@@ -10,6 +10,7 @@ import Cart from "./components/Cart";
 import CartDialog from "./components/CartDialog";
 import Checkout from "./components/Checkout";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Footer from "./components/Footer";
 
 import AdminMenu from "./admin/AdminMenu";
 import AdminLogin from "./admin/AdminLogin";
@@ -61,6 +62,7 @@ function App() {
           </ProtectedRoute>
         } />
       </Routes>
+      <Footer />
     </BrowserRouter>
   );
 }

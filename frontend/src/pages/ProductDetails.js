@@ -33,6 +33,37 @@ export default function ProductDetails() {
       </div>
     );
   }
+  const addToCart = (product) => {
+  try {
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    const normalized = {
+      ...product,
+      id: product.id,
+      price: Number(product.price || 0),
+    };
+
+    const existing = cart.find((item) => item.id === normalized.id);
+
+    if (existing) {
+      existing.qty = Number(existing.qty || 0) + 1;
+    } else {
+      cart.push({ ...normalized, qty: 1 });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    window.dispatchEvent(
+      new CustomEvent("cart_updated", { detail: cart })
+    );
+
+    alert("Added to cart");
+
+  } catch (err) {
+    console.error("addToCart error:", err);
+    alert("Failed to add to cart");
+  }
+};
 
   return (
     <div className="min-h-screen bg-slate-100 py-10 px-6">
@@ -156,10 +187,11 @@ export default function ProductDetails() {
           </p>
 
           <button
-            className="mt-10 px-8 py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-orange-400 text-white text-lg font-bold shadow-lg hover:scale-105 transition"
-          >
-            Add To Cart
-          </button>
+          onClick={() => addToCart(product)}
+          className="mt-10 px-8 py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-orange-400 text-white text-lg font-bold shadow-lg hover:scale-105 transition"
+        >
+          Add To Cart
+        </button>
 
         </div>
 

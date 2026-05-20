@@ -34,7 +34,7 @@ export default function ProductCard({ product, addToCart }) {
         <img
           src={getImageSrc()}
           alt={safeProduct.name || ""}
-          className="w-full h-44 object-cover group-hover:scale-110 transition duration-500"
+          className="w-full h-44 object-contain bg-white group-hover:scale-110 transition duration-500"
           onError={handleImageError}
         />
 

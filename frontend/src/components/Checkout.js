@@ -25,6 +25,45 @@ export default function Checkout() {
     address: "",
   });
 
+        const [showWhatsappPopup, setShowWhatsappPopup] =
+        useState(false);
+
+        const shareOnWhatsApp = () => {
+      const orderId = Date.now();
+
+      const productLines = cart
+        .map(
+          (item) =>
+            `${item.name} (${item.qty}) - ₹${(
+              item.price * item.qty
+            ).toFixed(2)}`
+        )
+        .join("\n");
+
+      const message = `
+    Thank you for shopping ❤️
+
+    Order ID: ${orderId}
+
+    Products:
+    ${productLines}
+
+    Total Amount: ₹${total.toFixed(2)}
+
+    Delivery Address:
+    ${form.address}
+    `;
+
+      // Customer mobile number
+      const customerNumber = form.mobile.replace(/\D/g, "");
+
+      const whatsappUrl = `https://wa.me/91${customerNumber}?text=${encodeURIComponent(
+        message
+      )}`;
+
+      window.open(whatsappUrl, "_blank");
+    };
+
   const [error, setError] = useState("");
       const [showCheckoutModal, setShowCheckoutModal] =
       useState(false);
@@ -94,7 +133,8 @@ export default function Checkout() {
         navigate("/");
       }, 2200);
 
-    alert("🎉 Order placed successfully!");
+    // alert("🎉 Order placed successfully!");
+    setShowWhatsappPopup(true);
     navigate("/");
   };
 
@@ -315,6 +355,76 @@ export default function Checkout() {
         </div>
 
       )}
+
+    </div>
+
+  </div>
+  
+
+)}
+{/* WHATSAPP POPUP */}
+{showWhatsappPopup && (
+
+  <div className="
+    fixed inset-0 z-50
+    flex items-center justify-center
+    bg-black/50
+    backdrop-blur-sm
+    px-4
+  ">
+
+    <div className="
+      bg-white
+      rounded-3xl
+      p-8
+      max-w-md
+      w-full
+      text-center
+      shadow-2xl
+    ">
+
+      <div className="text-6xl mb-4">
+        💬
+      </div>
+
+      <h2 className="text-2xl font-bold text-slate-800">
+        Share Order Details?
+      </h2>
+
+      <p className="text-slate-500 mt-3">
+        Send order confirmation through WhatsApp
+      </p>
+
+      <div className="flex gap-3 mt-6">
+
+        <button
+          onClick={() => {
+            setShowWhatsappPopup(false);
+            navigate("/");
+          }}
+          className="
+            w-full py-3 rounded-xl
+            border border-slate-200
+          "
+        >
+          Skip
+        </button>
+
+        <button
+          onClick={() => {
+            shareOnWhatsApp();
+            navigate("/");
+          }}
+          className="
+            w-full py-3 rounded-xl
+            bg-green-500 text-white
+            font-bold
+          "
+        >
+          WhatsApp
+        </button>
+
+      </div>
 
     </div>
 

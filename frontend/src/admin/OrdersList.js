@@ -17,6 +17,7 @@ export default function OrdersList() {
   const [activeFilter, setActiveFilter] = useState("today");
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [productMap, setProductMap] = useState({}); // id -> product
+  const [selectedDate, setSelectedDate] = useState("");
 
   /* FETCH ALL PRODUCTS ONCE for image lookup */
   useEffect(() => {
@@ -84,11 +85,34 @@ export default function OrdersList() {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const isInRange = (date) => {
-      if (activeFilter === "today") return date >= startOfToday;
-      if (activeFilter === "week") return date >= startOfWeek;
-      if (activeFilter === "month") return date >= startOfMonth;
-      return true;
-    };
+
+        // DATE PICKER FILTER
+        if (selectedDate) {
+
+          const picked = new Date(selectedDate);
+
+          return (
+            date.getFullYear() === picked.getFullYear() &&
+            date.getMonth() === picked.getMonth() &&
+            date.getDate() === picked.getDate()
+          );
+        }
+
+        // DEFAULT FILTERS
+        if (activeFilter === "today") {
+          return date >= startOfToday;
+        }
+
+        if (activeFilter === "week") {
+          return date >= startOfWeek;
+        }
+
+        if (activeFilter === "month") {
+          return date >= startOfMonth;
+        }
+
+        return true;
+      };
 
     const list = orders
       .map((order) => ({ ...order, _date: new Date(order.time) }))
@@ -99,7 +123,7 @@ export default function OrdersList() {
     const totalRevenue = list.reduce((sum, order) => sum + Number(order.total || 0), 0);
 
     return { filteredOrders: list, revenue: totalRevenue };
-  }, [orders, activeFilter]);
+    }, [orders, activeFilter, selectedDate]);
 
   const selectedOrder = useMemo(
     () => orders.find((order) => String(order.id) === String(selectedOrderId)),
@@ -141,7 +165,7 @@ export default function OrdersList() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           {filters.map((filter) => (
             <button
               key={filter.id}
@@ -156,6 +180,45 @@ export default function OrdersList() {
             </button>
           ))}
         </div>
+        {/* REVENUE CALENDAR */}
+    <input
+      type="date"
+      value={selectedDate}
+      onChange={(e) => setSelectedDate(e.target.value)}
+      className="
+        px-4
+        py-2
+        rounded-full
+        border
+        border-slate-200
+        bg-white
+        text-sm
+        text-slate-700
+        shadow-sm
+        focus:outline-none
+        focus:ring-2
+        focus:ring-indigo-500
+      "
+    />
+
+    {selectedDate && (
+      <button
+        onClick={() => setSelectedDate("")}
+        className="
+          px-4
+          py-2
+          rounded-full
+          bg-red-100
+          text-red-600
+          text-sm
+          font-semibold
+          hover:bg-red-200
+          transition
+        "
+      >
+        Clear
+      </button>
+    )}
       </div>
 
       {/* REVENUE CARD */}
@@ -175,6 +238,7 @@ export default function OrdersList() {
           </div>
         </div>
       </div>
+      
 
       {/* ORDERS TABLE */}
       <div className="max-w-6xl mx-auto bg-white/70 backdrop-blur-xl border border-slate-200 shadow-xl rounded-3xl overflow-hidden">
