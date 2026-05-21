@@ -17,9 +17,9 @@ export default function Grocery() {
         const snapshot = await getDocs(q);
 
         const items = snapshot.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
+        firestoreId: doc.id,
+        ...doc.data(),
+      }));
 
         setProducts(items);
       } catch (err) {

@@ -153,8 +153,7 @@ export default function AddProduct() {
           </h1>
 
           <p className="text-slate-500 mt-2">
-            Upload product with
-            multiple images
+            Upload product with multiple images
           </p>
 
         </div>
@@ -193,41 +192,41 @@ export default function AddProduct() {
 
           </div>
 
-          {/* ORIGINAL PRICE */}
-          <div>
+         {/* ORIGINAL PRICE */}
+            <div>
 
-            <label className="text-sm font-medium text-slate-700">
-              Original Price (₹)
-            </label>
+              <label className="text-sm font-medium text-slate-700">
+                Original Price (₹)
+              </label>
 
-            <input
-              type="number"
-              value={product.originalPrice}
-              onChange={handleChange("originalPrice")}
-              placeholder="Enter original price"
-              className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200"
-            />
+              <input
+                type="text"
+                inputMode="numeric"
+                value={product.originalPrice}
+                onChange={handleChange("originalPrice")}
+                placeholder="Enter original price"
+                className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200"
+              />
 
-          </div>
+            </div>
 
-          {/* PRICE */}
-          <div>
+            {/* PRICE */}
+            <div>
 
-            <label className="text-sm font-medium text-slate-700">
-              Price (₹)
-            </label>
+              <label className="text-sm font-medium text-slate-700">
+                Price (₹)
+              </label>
 
-            <input
-              type="number"
-              value={product.price}
-              onChange={handleChange(
-                "price"
-              )}
-              placeholder="Enter price"
-              className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200"
-            />
+              <input
+                type="text"
+                inputMode="numeric"
+                value={product.price}
+                onChange={handleChange("price")}
+                placeholder="Enter price"
+                className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200"
+              />
 
-          </div>
+            </div>
           {/* DESCRIPTION */}
           <div>
 

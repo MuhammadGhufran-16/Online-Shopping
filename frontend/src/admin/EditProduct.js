@@ -192,14 +192,15 @@ export default function EditProduct() {
               placeholder="Enter product name"
             />
           </div>
-          {/* ORIGINAL PRICE */}
+         {/* ORIGINAL PRICE */}
           <div>
             <label className="text-sm font-medium text-slate-700">
               Original Price (₹)
             </label>
 
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={product.originalPrice}
               onChange={handleChange("originalPrice")}
               className="
@@ -220,12 +221,27 @@ export default function EditProduct() {
 
           {/* PRICE */}
           <div>
-            <label className="text-sm font-medium text-slate-700">Price (₹)</label>
+            <label className="text-sm font-medium text-slate-700">
+              Price (₹)
+            </label>
+
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
               value={product.price}
               onChange={handleChange("price")}
-              className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-pink-400 outline-none"
+              className="
+                w-full
+                mt-1
+                px-4
+                py-3
+                rounded-xl
+                border
+                border-slate-200
+                focus:ring-2
+                focus:ring-pink-400
+                outline-none
+              "
               placeholder="Enter price"
             />
           </div>
