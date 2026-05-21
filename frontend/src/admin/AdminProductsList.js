@@ -1,11 +1,18 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { db } from "../firebase"; 
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { db } from "../firebase";
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 
 export default function AdminProductsList() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProducts, setSelectedProducts] = useState([]);
   const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
@@ -26,6 +33,47 @@ export default function AdminProductsList() {
       setLoading(false);
     }
   };
+      const handleBulkDelete = async () => {
+        if (selectedProducts.length === 0) {
+          alert("Please select at least one product to delete.");
+          return;
+        }
+
+        const confirmed = window.confirm(
+          `Are you sure you want to delete ${selectedProducts.length} product(s)?`
+        );
+        if (!confirmed) return;
+
+        try {
+          for (let docId of selectedProducts) {
+            await deleteDoc(doc(db, "products", docId));
+          }
+          setProducts((prev) =>
+            prev.filter((p) => !selectedProducts.includes(p.docId))
+          );
+          setSelectedProducts([]); // reset selection
+        } catch (err) {
+          console.error("Failed to delete products:", err);
+          alert("Failed to delete products. Try again.");
+        }
+      };
+  /* TOGGLE ACTIVE / NOT ACTIVE */
+  const toggleActive = async (docId, value) => {
+    try {
+      await updateDoc(doc(db, "products", docId), {
+        active: value,
+      });
+
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.docId === docId ? { ...p, active: value } : p
+        )
+      );
+    } catch (err) {
+      console.error("Failed to update active status:", err);
+      alert("Failed to update status. Try again.");
+    }
+  };
 
   /* DELETE PRODUCT */
   const handleDelete = async (docId, productName) => {
@@ -37,7 +85,7 @@ export default function AdminProductsList() {
     try {
       setDeletingId(docId);
       await deleteDoc(doc(db, "products", docId));
-      // Remove from local state instantly (no need to refetch)
+
       setProducts((prev) => prev.filter((p) => p.docId !== docId));
     } catch (err) {
       console.error("Failed to delete product:", err);
@@ -68,6 +116,7 @@ export default function AdminProductsList() {
           >
             ←
           </Link>
+
           <div>
             <h1 className="text-4xl font-extrabold text-slate-800">
               Products 📦
@@ -84,81 +133,105 @@ export default function AdminProductsList() {
         >
           + Add Product
         </Link>
-
+              <button
+        onClick={handleBulkDelete}
+        disabled={selectedProducts.length === 0}
+        className="px-6 py-3 rounded-full bg-red-500 text-white font-semibold shadow-lg hover:scale-105 transition disabled:opacity-50"
+      >
+        Delete Selected ({selectedProducts.length})
+      </button>
       </div>
 
-      {/* TABLE CARD */}
+      {/* TABLE */}
       <div className="max-w-6xl mx-auto bg-white/70 backdrop-blur-xl border border-slate-200 shadow-xl rounded-3xl overflow-hidden">
 
         {products.length === 0 ? (
           <div className="p-10 text-center">
-            <div className="text-6xl mb-4">📦</div>
             <h2 className="text-xl font-bold text-slate-800">
               No Products Found
             </h2>
-            <p className="text-slate-500 mt-2">
-              Start by adding your first product
-            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
 
             <table className="w-full text-sm">
 
-              {/* HEADER */}
-              <thead className="bg-gradient-to-r from-slate-100 to-slate-50 text-slate-600">
+              <thead className="bg-slate-100 text-slate-600">
                 <tr>
+                  <th className="text-left px-6 py-4">.</th>
                   <th className="text-left px-6 py-4">Product</th>
                   <th className="text-left px-6 py-4">Category</th>
                   <th className="text-left px-6 py-4">Price</th>
+                  <th className="text-left px-6 py-4">Status</th>
                   <th className="text-right px-6 py-4">Actions</th>
                 </tr>
               </thead>
 
-              {/* BODY */}
               <tbody>
                 {products.map((p) => (
                   <tr
                     key={p.docId}
-                    className="border-b border-slate-100 hover:bg-pink-50/40 transition"
+                    className="border-b hover:bg-pink-50/40"
                   >
-
+              {/* SELECT PRODUCT */}
+              <td className="px-6 py-4">
+                <input
+                  type="checkbox"
+                  checked={selectedProducts.includes(p.docId)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedProducts((prev) => [...prev, p.docId]);
+                    } else {
+                      setSelectedProducts((prev) => prev.filter((id) => id !== p.docId));
+                    }
+                  }}
+                  className="w-4 h-4 cursor-pointer"
+                />
+              </td>
                     {/* PRODUCT */}
                     <td className="px-6 py-4 flex items-center gap-3">
                       <img
                         src={p.image}
                         alt={p.name}
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = "/images/groceryImg.jpg";
-                        }}
-                        className="w-12 h-12 rounded-xl object-cover border shadow-sm"
+                        className="w-12 h-12 rounded-xl object-cover border"
                       />
                       <div>
-                        <p className="font-semibold text-slate-800">{p.name}</p>
+                        <p className="font-semibold">{p.name}</p>
                         <p className="text-xs text-slate-400">ID: {p.id}</p>
                       </div>
                     </td>
 
                     {/* CATEGORY */}
                     <td className="px-6 py-4">
-                      <span className="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-600">
-                        {p.category || "grocery"}
-                      </span>
+                      {p.category || "grocery"}
                     </td>
 
                     {/* PRICE */}
-                    <td className="px-6 py-4 font-bold text-slate-800">
+                    <td className="px-6 py-4 font-bold">
                       ₹ {Number(p.price || 0).toFixed(2)}
                     </td>
 
+                    {/* ACTIVE / NOT ACTIVE */}
+                    <td className="px-6 py-4">
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={p.active}
+                      onChange={() => toggleActive(p.docId, !p.active)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-300 peer-checked:bg-green-500 rounded-full peer transition-all"></div>
+                    <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-all peer-checked:translate-x-5"></div>
+                  </label>
+                  </td>
+
                     {/* ACTIONS */}
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-3">
+                      <div className="flex justify-end gap-3">
 
                         <Link
                           to={`/admin/edit/${p.docId}`}
-                          className="px-4 py-2 rounded-full bg-indigo-600 text-white text-xs font-semibold shadow hover:scale-105 transition"
+                          className="px-4 py-2 bg-indigo-600 text-white rounded-full text-xs"
                         >
                           Edit
                         </Link>
@@ -166,7 +239,7 @@ export default function AdminProductsList() {
                         <button
                           onClick={() => handleDelete(p.docId, p.name)}
                           disabled={deletingId === p.docId}
-                          className="px-4 py-2 rounded-full bg-red-500 text-white text-xs font-semibold shadow hover:scale-105 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-4 py-2 bg-red-500 text-white rounded-full text-xs"
                         >
                           {deletingId === p.docId ? "Deleting..." : "Delete"}
                         </button>
@@ -184,7 +257,6 @@ export default function AdminProductsList() {
         )}
 
       </div>
-
     </div>
   );
 }

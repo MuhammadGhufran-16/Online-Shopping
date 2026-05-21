@@ -87,7 +87,7 @@ export default function OrdersList() {
         }
       };
 
-        const { filteredOrders, revenue } = useMemo(() => {
+        const { filteredOrders, revenue, profit } = useMemo(() => {
         const now = new Date();
         const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         const startOfWeek = new Date(startOfToday);
@@ -122,8 +122,37 @@ export default function OrdersList() {
           if (!order.paymentConfirmed) return sum;
           return sum + Number(order.total || 0);
         }, 0);
+        const totalProfit = list.reduce((sum, order) => {
 
-        return { filteredOrders: list, revenue: totalRevenue };
+          if (!order.paymentConfirmed) return sum;
+
+          const orderProfit = (order.cart || []).reduce(
+            (itemSum, item) => {
+
+              const selling =
+                Number(item.price || item.productPrice || 0);
+
+              const original =
+                Number(item.originalPrice || 0);
+
+              const qty =
+                Number(item.qty || 1);
+
+              return itemSum + (selling - original) * qty;
+
+            },
+            0
+          );
+
+          return sum + orderProfit;
+
+        }, 0);
+
+        return {
+        filteredOrders: list,
+        revenue: totalRevenue,
+        profit: totalProfit,
+      };
       }, [orders, activeFilter, selectedDate]);
 
   const selectedOrder = useMemo(
@@ -232,6 +261,9 @@ export default function OrdersList() {
             <h2 className="text-3xl font-extrabold text-slate-800 mt-1">
               Rs. {revenue.toFixed(2)}
             </h2>
+              <h2 className="text-3xl font-extrabold text-green-600 mt-1">
+            Rs. {profit.toFixed(2)}
+          </h2>
           </div>
           <div className="text-right">
             <p className="text-sm text-slate-500">Orders</p>

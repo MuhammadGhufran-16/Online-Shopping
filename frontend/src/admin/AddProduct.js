@@ -21,6 +21,7 @@ export default function AddProduct() {
 
       const [product, setProduct] = useState({
       name: "",
+      originalPrice: "",
       price: "",
       description: "",
       images: [],
@@ -105,6 +106,7 @@ export default function AddProduct() {
       const newProduct = {
         id: `prod_${Date.now()}`,
         name: product.name.trim(),
+        originalPrice: Number(product.originalPrice || 0),
         price: Number(product.price || 0),
 
         description: product.description.trim(),
@@ -186,6 +188,23 @@ export default function AddProduct() {
                 "name"
               )}
               placeholder="Enter product name"
+              className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200"
+            />
+
+          </div>
+
+          {/* ORIGINAL PRICE */}
+          <div>
+
+            <label className="text-sm font-medium text-slate-700">
+              Original Price (₹)
+            </label>
+
+            <input
+              type="number"
+              value={product.originalPrice}
+              onChange={handleChange("originalPrice")}
+              placeholder="Enter original price"
               className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200"
             />
 

@@ -1,65 +1,49 @@
 // src/pages/Home.js
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
-import { subscribeProducts } from "../utils/storeApi";
+import { db } from "../firebase";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 export default function Home() {
   const [allProducts, setAllProducts] = useState([]);
-  const navigate = useNavigate();
-
   const [cartCount, setCartCount] = useState(0);
 
+  // Fetch all active products from Firestore
   useEffect(() => {
-    let unsubscribe = () => {};
+    const fetchProducts = async () => {
+      try {
+        const q = query(collection(db, "products"), where("active", "==", true));
+        const snapshot = await getDocs(q);
 
-    subscribeProducts(
-      (products) => {
-        setAllProducts(products.slice(0, 12));
-      },
-      (error) => {
-        console.error("products subscription error:", error);
+        const products = snapshot.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+
+        setAllProducts(products.slice(0, 12)); // show first 12 trending
+      } catch (err) {
+        console.error("Failed to load products:", err);
       }
-    ).then((cleanup) => {
-      unsubscribe = cleanup;
-    }).catch((error) => {
-      console.error("products load error:", error);
-    });
+    };
 
-    return () => unsubscribe();
+    fetchProducts();
   }, []);
 
+  // Update cart count from localStorage
   useEffect(() => {
+    const updateCartCount = () => {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      if (!Array.isArray(cart)) cart = [];
 
-      const updateCartCount = () => {
+      const totalQty = cart.reduce((sum, item) => sum + Number(item.qty || 1), 0);
+      setCartCount(totalQty);
+    };
 
-        let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-        if (!Array.isArray(cart)) cart = [];
-
-        const totalQty = cart.reduce(
-          (sum, item) => sum + Number(item.qty || 1),
-          0
-        );
-
-        setCartCount(totalQty);
-      };
-
-      updateCartCount();
-
-      window.addEventListener(
-        "cart_updated",
-        updateCartCount
-      );
-
-      return () => {
-        window.removeEventListener(
-          "cart_updated",
-          updateCartCount
-        );
-      };
-
-    }, []);
+    updateCartCount();
+    window.addEventListener("cart_updated", updateCartCount);
+    return () => window.removeEventListener("cart_updated", updateCartCount);
+  }, []);
 
   const addToCart = (product) => {
     try {
@@ -72,7 +56,6 @@ export default function Home() {
       };
 
       const existingItem = cart.find((item) => item.id === normalized.id);
-
       if (existingItem) {
         existingItem.qty = Number(existingItem.qty || 0) + 1;
       } else {
@@ -178,15 +161,14 @@ export default function Home() {
 
       {/* PRODUCTS */}
 
+      {/* PRODUCTS */}
+
       <section className="mt-14">
-
         <div className="flex items-center justify-between mb-6">
-
           <div>
             <h2 className="text-3xl font-bold text-slate-900">
               Trending Products
             </h2>
-
             <p className="text-slate-500 mt-1">
               Best-selling products this week
             </p>
@@ -198,17 +180,14 @@ export default function Home() {
           >
             View all →
           </Link>
-
         </div>
 
         {allProducts.length === 0 ? (
-          <div className="bg-white rounded-2xl p-10 text-center border border-slate-200">
-            <p className="text-slate-500">
-              No products found.
-            </p>
+          <div className="bg-white rounded-2xl p-10 text-center border border-slate-200 text-slate-500 text-lg font-medium">
+            No products available at this time.
           </div>
         ) : (
-          <div className="product-grid">
+          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {allProducts.map((p) => (
               <ProductCard
                 key={p.id}
@@ -218,7 +197,6 @@ export default function Home() {
             ))}
           </div>
         )}
-
       </section>
 
     </div>

@@ -20,19 +20,42 @@ import { addDoc } from "firebase/firestore";
 const productsCollection = collection(db, "products");
 const ordersCollection = collection(db, "orders");
 
-const normalizeOrderItems = (order = {}) => {
-  const sourceItems = Array.isArray(order.items)
-    ? order.items
-    : Array.isArray(order.cart)
+  const normalizeOrderItems = (order = {}) => {
+    const sourceItems = Array.isArray(order.items)
+      ? order.items
+      : Array.isArray(order.cart)
       ? order.cart
       : [];
 
-  return sourceItems.map((item) => ({
-    productName: item.productName || item.name || "Product",
-    productPrice: Number(item.productPrice ?? item.price ?? 0),
-    qty: Number(item.qty || 1),
-  }));
-};
+    return sourceItems
+      .filter(Boolean)
+      .map((item) => ({
+        id: item.id || item.productId || "",
+
+        productName: String(
+          item.productName || item.name || "Product"
+        ),
+
+        // selling price
+        productPrice: Number(
+          item.productPrice ?? item.price ?? 0
+        ),
+
+        // keep duplicate for compatibility
+        price: Number(
+          item.productPrice ?? item.price ?? 0
+        ),
+
+        // cost/original price
+        originalPrice: Number(
+          item.originalPrice ?? 0
+        ),
+
+        qty: Number(item.qty ?? 1),
+
+        image: item.image || "",
+      }));
+  };
 
 const normalizeOrder = (order = {}, index = 0) => ({
   id: order.id || "",
@@ -44,7 +67,7 @@ const normalizeOrder = (order = {}, index = 0) => ({
   paymentConfirmed: Boolean(order.paymentConfirmed),
   time: order.time || new Date().toString(),
   items: normalizeOrderItems(order),
-  cart: Array.isArray(order.cart) ? order.cart : normalizeOrderItems(order),
+  cart: normalizeOrderItems(order),
 });
 
 const normalizeOrders = (orders = []) => {
@@ -179,7 +202,28 @@ export const getProductById = async (id) => {
 
 
 export const createOrder = async (order) => {
-  const normalized = normalizeOrder(order);
+
+  const orderWithOriginalPrices = {
+    ...order,
+
+    items: (order.items || order.cart || []).map((item) => ({
+      ...item,
+
+      productName:
+        item.productName || item.name || "Product",
+
+      productPrice:
+        Number(item.productPrice ?? item.price ?? 0),
+
+      originalPrice:
+        Number(item.originalPrice ?? 0),
+
+      qty:
+        Number(item.qty ?? 1),
+    })),
+  };
+
+  const normalized = normalizeOrder(orderWithOriginalPrices);
 
   const docRef = await addDoc(ordersCollection, normalized);
 
@@ -201,11 +245,12 @@ export const toOrderViewModel = (order = {}) => {
   return {
     ...normalized,
     cart: normalized.items.map((item, index) => ({
-      id: `${normalized.id}_${index}`,
-      name: item.productName,
-      price: Number(item.productPrice || 0),
-      qty: Number(item.qty || 1),
-    })),
+    id: `${normalized.id}_${index}`,
+    name: item.productName,
+    price: Number(item.productPrice || 0),
+    originalPrice: Number(item.originalPrice || 0),
+    qty: Number(item.qty || 1),
+  })),
   };
 };
 

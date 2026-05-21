@@ -26,6 +26,7 @@ export default function EditProduct() {
         const data = docSnap.data();
         setProduct({
         name: data.name || "",
+        originalPrice: data.originalPrice || "",
         price: data.price || "",
 
         description: data.description || "",
@@ -113,6 +114,7 @@ export default function EditProduct() {
       const docRef = doc(db, "products", id);
               await updateDoc(docRef, {
           name: product.name.trim(),
+          originalPrice: Number(product.originalPrice || 0),
 
           price: Number(product.price || 0),
 
@@ -188,6 +190,31 @@ export default function EditProduct() {
               onChange={handleChange("name")}
               className="w-full mt-1 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-pink-400 outline-none"
               placeholder="Enter product name"
+            />
+          </div>
+          {/* ORIGINAL PRICE */}
+          <div>
+            <label className="text-sm font-medium text-slate-700">
+              Original Price (₹)
+            </label>
+
+            <input
+              type="number"
+              value={product.originalPrice}
+              onChange={handleChange("originalPrice")}
+              className="
+                w-full
+                mt-1
+                px-4
+                py-3
+                rounded-xl
+                border
+                border-slate-200
+                focus:ring-2
+                focus:ring-pink-400
+                outline-none
+              "
+              placeholder="Enter original price"
             />
           </div>
 
