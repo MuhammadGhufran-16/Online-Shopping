@@ -1,30 +1,45 @@
 // src/pages/Home.js
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import { db } from "../firebase";
 import { collection, getDocs, query, where } from "firebase/firestore";
 
 export default function Home() {
   const [allProducts, setAllProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [cartCount, setCartCount] = useState(0);
+  const navigate = useNavigate();
 
   // Fetch all active products from Firestore
   useEffect(() => {
     const fetchProducts = async () => {
-      try {
-        const q = query(collection(db, "products"), where("active", "==", true));
-        const snapshot = await getDocs(q);
+  try {
+    setLoading(true);
 
-        const products = snapshot.docs.map((doc) => ({
-          ...doc.data(),
-          id: doc.id,
-        }));
+    const q = query(
+      collection(db, "products"),
+      where("active", "==", true)
+    );
 
-        setAllProducts(products.slice(0, 12)); // show first 12 trending
-      } catch (err) {
-        console.error("Failed to load products:", err);
-      }
+    const snapshot = await getDocs(q);
+
+    const products = snapshot.docs.map((doc) => ({
+      firestoreId: doc.id,
+      ...doc.data(),
+    }));
+
+    setAllProducts(products);
+
+  } catch (err) {
+
+    console.error("Failed to load products:", err);
+
+  } finally {
+
+    setLoading(false);
+
+  }
     };
 
     fetchProducts();
@@ -182,21 +197,52 @@ export default function Home() {
           </Link>
         </div>
 
-        {allProducts.length === 0 ? (
-          <div className="bg-white rounded-2xl p-10 text-center border border-slate-200 text-slate-500 text-lg font-medium">
-            No products available at this time.
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {allProducts.map((p) => (
+              {loading ? (
+
+        <div className="bg-white rounded-2xl p-10 text-center border border-slate-200">
+
+          <div className="flex justify-center">
+          <div className="w-12 h-12 border-4 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+
+          <p className="mt-4 text-slate-500 text-lg font-medium">
+            Loading products...
+          </p>
+
+        </div>
+
+      ) : allProducts.length === 0 ? (
+
+        <div className="bg-white rounded-2xl p-10 text-center border border-slate-200 text-slate-500 text-lg font-medium">
+          No products available at this time.
+        </div>
+
+      ) : (
+
+        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+
+          {allProducts.map((p) => (
+
+            <div
+              key={p.firestoreId}
+              className="transform transition duration-300 hover:-translate-y-3 cursor-pointer"
+              onClick={() =>
+                navigate(`/product/${p.firestoreId}`)
+              }
+            >
+
               <ProductCard
-                key={p.id}
                 product={p}
                 addToCart={addToCart}
               />
-            ))}
-          </div>
-        )}
+
+            </div>
+
+          ))}
+
+        </div>
+
+      )}
       </section>
 
     </div>
