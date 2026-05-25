@@ -16,6 +16,7 @@ export default function Cart() {
       ...item,
       qty: Number(item?.qty || 1),
       price: Number(item?.price || 0),
+      originalPrice: Number(item?.originalPrice || 0),
     }));
 
     setCart(saved);
@@ -29,6 +30,7 @@ export default function Cart() {
         ...item,
         qty: Number(item.qty || 1),
         price: Number(item.price || 0),
+        originalPrice: Number(item.originalPrice || 0),
       }));
       setCart(normalised);
     };

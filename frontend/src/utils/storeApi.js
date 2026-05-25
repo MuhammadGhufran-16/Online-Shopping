@@ -28,34 +28,29 @@ const ordersCollection = collection(db, "orders");
       : [];
 
     return sourceItems
-      .filter(Boolean)
-      .map((item) => ({
-        id: item.id || item.productId || "",
+  .filter(Boolean)
+  .map((item) => ({
+    id: item.id || item.productId || "",
 
-        productName: String(
-          item.productName || item.name || "Product"
-        ),
+    productName: String(
+      item.productName || item.name || "Product"
+    ),
 
-        // selling price
-        productPrice: Number(
-          item.productPrice ?? item.price ?? 0
-        ),
+    productPrice: Number(
+      item.productPrice ?? item.price ?? 0
+    ),
 
-        // keep duplicate for compatibility
-        price: Number(
-          item.productPrice ?? item.price ?? 0
-        ),
+    price: Number(
+      item.productPrice ?? item.price ?? 0
+    ),
 
-        // cost/original price
-        originalPrice: Number(
-          item.originalPrice ?? 0
-        ),
+    originalPrice: Number(
+      item.originalPrice ?? 0
+    ),
 
-        qty: Number(item.qty ?? 1),
-
-        image: item.image || "",
-      }));
-  };
+    qty: Number(item.qty ?? 1),
+  }));
+};
 
 const normalizeOrder = (order = {}, index = 0) => ({
   id: order.id || "",
@@ -134,7 +129,6 @@ export const migrateOrdersToFirestore = async () => {
   }
 
   await writeOrders(legacyOrders);
-  localStorage.setItem("orders", JSON.stringify(legacyOrders));
 };
 
 export const subscribeProducts = async (onData, onError) => {
@@ -168,7 +162,6 @@ export const subscribeOrders = async (onData, onError) => {
         normalizeOrder({ ...item.data(), id: item.id }, index)
       );
 
-      localStorage.setItem("orders", JSON.stringify(orders));
       onData(orders);
     },
     onError

@@ -123,29 +123,17 @@ export default function OrdersList() {
           return sum + Number(order.total || 0);
         }, 0);
         const totalProfit = list.reduce((sum, order) => {
-
           if (!order.paymentConfirmed) return sum;
 
-          const orderProfit = (order.cart || []).reduce(
-            (itemSum, item) => {
-
-              const selling =
-                Number(item.price || item.productPrice || 0);
-
-              const original =
-                Number(item.originalPrice || 0);
-
-              const qty =
-                Number(item.qty || 1);
-
-              return itemSum + (selling - original) * qty;
-
-            },
-            0
-          );
+          const orderProfit = (order.cart || []).reduce((itemSum, item) => {
+            const sellingPrice = Number(item.price || item.productPrice || 0);
+            const originalPrice = Number(item.originalPrice || 0);
+            const qty = Number(item.qty || 1);
+            const perItemProfit = sellingPrice - originalPrice;
+            return itemSum + (perItemProfit * qty);
+          }, 0);
 
           return sum + orderProfit;
-
         }, 0);
 
         return {
@@ -261,9 +249,13 @@ export default function OrdersList() {
             <h2 className="text-3xl font-extrabold text-slate-800 mt-1">
               Rs. {revenue.toFixed(2)}
             </h2>
-              <h2 className="text-3xl font-extrabold text-green-600 mt-1">
-            Rs. {profit.toFixed(2)}
-          </h2>
+              <p className="text-sm text-slate-500 mt-3">
+              Profit
+            </p>
+
+            <h2 className="text-3xl font-extrabold text-green-600 mt-1">
+              Rs. {profit.toFixed(2)}
+            </h2>
           </div>
           <div className="text-right">
             <p className="text-sm text-slate-500">Orders</p>
