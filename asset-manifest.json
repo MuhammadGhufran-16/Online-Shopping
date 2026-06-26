@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/Online-Shopping/static/css/main.c9065063.css",
-    "main.js": "/Online-Shopping/static/js/main.d1b6af57.js",
+    "main.js": "/Online-Shopping/static/js/main.c7d643f7.js",
     "static/js/453.d7446e4a.chunk.js": "/Online-Shopping/static/js/453.d7446e4a.chunk.js",
     "static/media/oilImg.jpg": "/Online-Shopping/static/media/oilImg.05b1f429df03bdb3efd4.jpg",
     "static/media/Am Logo.png": "/Online-Shopping/static/media/Am Logo.c2084c8a786eefd6a329.png",
@@ -10,11 +10,11 @@
     "static/media/groceryImg.jpg": "/Online-Shopping/static/media/groceryImg.d91379a7a4e2faf748c5.jpg",
     "index.html": "/Online-Shopping/index.html",
     "main.c9065063.css.map": "/Online-Shopping/static/css/main.c9065063.css.map",
-    "main.d1b6af57.js.map": "/Online-Shopping/static/js/main.d1b6af57.js.map",
+    "main.c7d643f7.js.map": "/Online-Shopping/static/js/main.c7d643f7.js.map",
     "453.d7446e4a.chunk.js.map": "/Online-Shopping/static/js/453.d7446e4a.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.c9065063.css",
-    "static/js/main.d1b6af57.js"
+    "static/js/main.c7d643f7.js"
   ]
 }
