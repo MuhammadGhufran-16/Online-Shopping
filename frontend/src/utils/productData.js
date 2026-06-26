@@ -92,6 +92,7 @@ export const normalizeProduct = (product = {}, index = 0) => {
     id: product.id || seed?.id || `prod_${index}`,
     name: product.name || seed?.name || "Product",
     price: Number(product.price ?? seed?.price ?? 0),
+    originalPrice: Number(product.originalPrice ?? seed?.originalPrice ?? 0),
     category: product.category || seed?.category || "grocery",
     image: primaryImage,
     images: images.length > 0 ? images : [primaryImage],

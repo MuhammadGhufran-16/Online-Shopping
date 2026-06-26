@@ -253,7 +253,7 @@ export default function OrdersList() {
               Profit
             </p>
 
-            <h2 className="text-3xl font-extrabold text-green-600 mt-1">
+            <h2 className="text-3xl font-extrabold text-green-600 mt-1 profit_amount">
               Rs. {profit.toFixed(2)}
             </h2>
           </div>

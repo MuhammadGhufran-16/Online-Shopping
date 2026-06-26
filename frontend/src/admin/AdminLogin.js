@@ -24,7 +24,7 @@ export default function AdminLogin() {
 
     if (
       credentials.username === "ghufran16" &&
-      credentials.password === "123456"
+      credentials.password === "654321"
     ) {
       localStorage.setItem("isAdminAuthenticated", "true");
       navigate("/admin");

@@ -67,6 +67,7 @@ export default function Grocery() {
         id: product.id, // IMPORTANT FIX
         name: product.name,
         price: Number(product.price || 0),
+        originalPrice: Number(product.originalPrice || 0),
         images: product.images || [],
       };
 
